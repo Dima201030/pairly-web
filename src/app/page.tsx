@@ -38,7 +38,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
         <div className="animate-pulse-slow text-[var(--color-brand)] text-2xl">Pairly</div>
       </div>
     );
@@ -67,13 +67,13 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
       <ToastProvider>
         <main className="flex-1 overflow-hidden">
           {renderTab()}
         </main>
         
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom z-50" role="navigation" aria-label="Основная навигация">
+        <nav className="fixed bottom-0 left-0 right-0 bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-area-bottom z-50" role="navigation" aria-label="Основная навигация">
           <div className="grid grid-cols-5 gap-1 px-2 py-2">
             {filteredTabs.map((tab) => (
               <button
