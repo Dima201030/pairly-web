@@ -1,35 +1,39 @@
 export const colors = {
-  brand: '#D3A58C',
-  brandDark: '#B8947A',
-  brandLight: '#E8D4C4',
-  
-  background: '#FAFAFA',
-  surface: '#FFFFFF',
-  surfaceSecondary: '#F5F5F5',
-  
-  textPrimary: '#1A1A1A',
-  textSecondary: '#6B6B6B',
-  textTertiary: '#999999',
-  
-  red: '#E53E3E',
-  redLight: '#FC8181',
-  green: '#38A169',
-  greenLight: '#68D391',
-  orange: '#DD6B20',
-  orangeLight: '#F6AD55',
-  yellow: '#D69E2E',
-  yellowLight: '#F6E05E',
-  
-  border: '#E2E8F0',
-  divider: '#EDF2F7',
-  
+  brand: '#00D4AA',
+  brandDark: '#00B894',
+  brandLight: '#33E8C4',
+
+  brandBlue: '#0096FF',
+  brandBlueDark: '#0077CC',
+  brandBlueLight: '#33AEFF',
+
+  background: '#0A0F14',
+  surface: '#12181F',
+  surfaceSecondary: '#1A222D',
+
+  textPrimary: '#F0F4F8',
+  textSecondary: '#A0AEC0',
+  textTertiary: '#718096',
+
+  red: '#FC8181',
+  redLight: '#FEB2B2',
+  green: '#68D391',
+  greenLight: '#9AE6B4',
+  orange: '#F6AD55',
+  orangeLight: '#FBD38D',
+  yellow: '#F6E05E',
+  yellowLight: '#FAF089',
+
+  border: '#2D3748',
+  divider: '#1A202C',
+
   sport: {
-    padel: '#00BFA6',
+    padel: '#00D4AA',
     tennis: '#FFD700',
-    badminton: '#E53E3E',
-    squash: '#805AD5',
-    football: '#3182CE',
-    running: '#38A169',
+    badminton: '#FC8181',
+    squash: '#B794F4',
+    football: '#63B3ED',
+    running: '#68D391',
   },
 };
 
@@ -52,10 +56,10 @@ export const borderRadius = {
 };
 
 export const shadows = {
-  sm: '0 1px 2px rgba(0,0,0,0.05)',
-  md: '0 4px 6px rgba(0,0,0,0.07)',
-  lg: '0 10px 25px rgba(0,0,0,0.1)',
-  xl: '0 20px 40px rgba(0,0,0,0.12)',
+  sm: '0 1px 2px rgba(0,0,0,0.3)',
+  md: '0 4px 6px rgba(0,0,0,0.4)',
+  lg: '0 10px 25px rgba(0,0,0,0.5)',
+  xl: '0 20px 40px rgba(0,0,0,0.6)',
 };
 
 export const typography = {
@@ -71,12 +75,12 @@ export const typography = {
 };
 
 export const sportColors: Record<string, string> = {
-  padel: '#00BFA6',
+  padel: '#00D4AA',
   tennis: '#FFD700',
-  badminton: '#E53E3E',
-  squash: '#805AD5',
-  football: '#3182CE',
-  running: '#38A169',
+  badminton: '#FC8181',
+  squash: '#B794F4',
+  football: '#63B3ED',
+  running: '#68D391',
 };
 
 export const sportIcons: Record<string, string> = {
@@ -112,10 +116,10 @@ export const roleNames: Record<string, string> = {
 };
 
 export const roleColors: Record<string, string> = {
-  user: '#999999',
-  moderator: '#D3A58C',
-  support: '#38A169',
-  host: '#D69E2E',
+  user: '#718096',
+  moderator: '#00D4AA',
+  support: '#68D391',
+  host: '#F6E05E',
 };
 
 export const reasonNames: Record<string, string> = {

@@ -1,29 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #D3A58C;
-  --color-brand-dark: #B8947A;
-  --color-brand-light: #E8D4C4;
-  
-  --color-bg: #FAFAFA;
-  --color-surface: #FFFFFF;
-  --color-surface-secondary: #F5F5F5;
-  
-  --color-text-primary: #1A1A1A;
-  --color-text-secondary: #6B6B6B;
-  --color-text-tertiary: #999999;
-  
-  --color-red: #E53E3E;
-  --color-red-light: #FC8181;
-  --color-green: #38A169;
-  --color-green-light: #68D391;
-  --color-orange: #DD6B20;
-  --color-orange-light: #F6AD55;
-  --color-yellow: #D69E2E;
-  --color-yellow-light: #F6E05E;
-  
-  --color-border: #E2E8F0;
-  --color-divider: #EDF2F7;
+  --color-brand: #00D4AA;
+  --color-brand-dark: #00B894;
+  --color-brand-light: #33E8C4;
+
+  --color-brand-blue: #0096FF;
+  --color-brand-blue-dark: #0077CC;
+  --color-brand-blue-light: #33AEFF;
+
+  --color-bg: #0A0F14;
+  --color-surface: #12181F;
+  --color-surface-secondary: #1A222D;
+
+  --color-text-primary: #F0F4F8;
+  --color-text-secondary: #A0AEC0;
+  --color-text-tertiary: #718096;
+
+  --color-red: #FC8181;
+  --color-red-light: #FEB2B2;
+  --color-green: #68D391;
+  --color-green-light: #9AE6B4;
+  --color-orange: #F6AD55;
+  --color-orange-light: #FBD38D;
+  --color-yellow: #F6E05E;
+  --color-yellow-light: #FAF089;
+
+  --color-border: #2D3748;
+  --color-divider: #1A202C;
 }
 
 @layer base {
@@ -32,7 +36,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   body {
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -44,31 +48,38 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+    @apply bg-[var(--color-surface)] rounded-2xl shadow-sm border border-[var(--color-border)];
   }
-  
+
   .btn-primary {
-    @apply bg-[var(--color-brand)] text-white px-6 py-3 rounded-xl font-semibold 
-           hover:bg-[var(--color-brand-dark)] transition-colors duration-200
+    @apply bg-[var(--color-brand)] text-[var(--color-bg)] px-6 py-3 rounded-xl font-semibold
+           hover:bg-[var(--color-brand-light)] transition-colors duration-200
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
+
+  .btn-primary-blue {
+    @apply bg-[var(--color-brand-blue)] text-white px-6 py-3 rounded-xl font-semibold
+           hover:bg-[var(--color-brand-blue-light)] transition-colors duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
   .btn-secondary {
-    @apply bg-white text-[var(--color-brand)] px-6 py-3 rounded-xl font-semibold 
-           border border-[var(--color-brand)] hover:bg-[var(--color-brand-light)] 
+    @apply bg-[var(--color-surface-secondary)] text-[var(--color-brand)] px-6 py-3 rounded-xl font-semibold
+           border border-[var(--color-brand)] hover:bg-[var(--color-brand)] hover:text-[var(--color-bg)]
            transition-colors duration-200;
   }
-  
+
   .btn-danger {
-    @apply bg-red-500 text-white px-6 py-3 rounded-xl font-semibold 
+    @apply bg-red-500 text-white px-6 py-3 rounded-xl font-semibold
            hover:bg-red-600 transition-colors duration-200;
   }
-  
+
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-200 
-           focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] 
+    @apply w-full px-4 py-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)]
+           focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]
            focus:border-transparent transition-all duration-200
-           placeholder:text-gray-400;
+           placeholder:text-[var(--color-text-tertiary)]
+           text-[var(--color-text-primary)];
   }
 }
 
@@ -76,19 +87,20 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   .glass {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(18, 24, 31, 0.8);
     backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
   }
 }
 

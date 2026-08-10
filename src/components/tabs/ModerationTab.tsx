@@ -1,24 +1,27 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc } from 'firebase/firestore';
-import { UserProfile, UserRole, Tournament, SavedVenue } from '@/lib/types';
+import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc, where, Timestamp } from 'firebase/firestore';
+import { UserProfile, UserRole, Tournament, SavedVenue, Match } from '@/lib/types';
 import { useEffect, useState } from 'react';
 
 export function ModerationTab() {
   const { profile, isStaff, isModerator, isHost } = useAuth();
   const { showToast } = useToast();
-  const [activeSection, setActiveSection] = useState<'tournaments' | 'users' | 'venues' | 'support'>('tournaments');
+  const [activeSection, setActiveSection] = useState<'tournaments' | 'matches' | 'users' | 'venues' | 'support'>('tournaments');
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [tournamentsLoading, setTournamentsLoading] = useState(true);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [venues, setVenues] = useState<SavedVenue[]>([]);
   const [venuesLoading, setVenuesLoading] = useState(true);
   const [showAddVenue, setShowAddVenue] = useState(false);
   const [newVenue, setNewVenue] = useState({ name: '', city: '', district: '' });
   const [geocoding, setGeocoding] = useState(false);
   const [venueCoords, setVenueCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [manualCoords, setManualCoords] = useState({ lat: '', lng: '' });
 
   useEffect(() => {
     if (!profile) return;
@@ -46,7 +49,25 @@ export function ModerationTab() {
       setVenuesLoading(false);
     });
 
-    return () => { usersUnsub(); tourneysUnsub(); venuesUnsub(); };
+    const matchesQ = query(
+      collection(db, 'matches'),
+      where('startDate', '>=', Timestamp.fromDate(new Date())),
+      orderBy('startDate', 'desc'),
+      limit(200)
+    );
+    const matchesUnsub = onSnapshot(matchesQ, (snap) => {
+      setMatches(snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          startDate: data.startDate?.toDate?.() || new Date(data.startDate),
+        } as Match;
+      }));
+      setMatchesLoading(false);
+    });
+
+    return () => { usersUnsub(); tourneysUnsub(); venuesUnsub(); matchesUnsub(); };
   }, [profile, isModerator, isHost]);
 
   if (!isStaff) {
@@ -74,6 +95,12 @@ export function ModerationTab() {
     showToast('Место удалено', 'success');
   };
 
+  const deleteMatch = async (matchId: string) => {
+    if (!confirm('Удалить этот матч?')) return;
+    await deleteDoc(doc(db, 'matches', matchId));
+    showToast('Матч удалён', 'success');
+  };
+
   const geocodeAddress = async () => {
     const q = [newVenue.name, newVenue.district, newVenue.city]
       .filter(s => s.trim()).join(', ');
@@ -98,7 +125,8 @@ export function ModerationTab() {
   };
 
   const saveVenue = async () => {
-    if (!venueCoords || !newVenue.name.trim()) return;
+    const coords = venueCoords || (manualCoords.lat && manualCoords.lng ? { lat: parseFloat(manualCoords.lat), lng: parseFloat(manualCoords.lng) } : null);
+    if (!coords || !newVenue.name.trim()) return;
 
     try {
       await addDoc(collection(db, 'venues'), {
@@ -107,13 +135,14 @@ export function ModerationTab() {
         district: newVenue.district.trim(),
         sport: null,
         authorID: profile?.uid || null,
-        latitude: venueCoords.lat,
-        longitude: venueCoords.lng,
+        latitude: coords.lat,
+        longitude: coords.lng,
       });
       showToast('Место добавлено!', 'success');
       setShowAddVenue(false);
       setNewVenue({ name: '', city: '', district: '' });
       setVenueCoords(null);
+      setManualCoords({ lat: '', lng: '' });
     } catch {
       showToast('Ошибка при сохранении', 'error');
     }
@@ -145,6 +174,7 @@ export function ModerationTab() {
       <div className="flex gap-2 overflow-x-auto pb-2" role="tablist">
         {[
           { id: 'tournaments', label: 'Турниры', icon: '🏆' },
+          { id: 'matches', label: 'Матчи', icon: '🏟️' },
           { id: 'users', label: 'Пользователи', icon: '👥' },
           { id: 'venues', label: 'Клубы', icon: '🏟️' },
           { id: 'support', label: 'Поддержка', icon: '🎧' },
@@ -226,12 +256,54 @@ export function ModerationTab() {
         </div>
       )}
 
+      {activeSection === 'matches' && (
+        <div className="space-y-3">
+          {matchesLoading ? (
+            <div className="flex items-center justify-center py-8">Загрузка...</div>
+          ) : matches.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p className="font-medium">Матчей пока нет</p>
+            </div>
+          ) : (
+            matches.map(m => (
+              <div key={m.id} className="card p-4">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate">{m.venue}</p>
+                    <p className="text-sm text-gray-500">{m.city}{m.district ? ` · ${m.district}` : ''}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(m.startDate).toLocaleString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · {m.sport} · {m.level}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${m.openSpots > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {m.openSpots > 0 ? `${m.openSpots} мест` : 'Мест нет'}
+                    </span>
+                    <button
+                      onClick={() => deleteMatch(m.id)}
+                      className="px-3 py-1.5 text-sm rounded-lg bg-red-100 text-red-700 font-medium flex-shrink-0"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {activeSection === 'venues' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500">{venues.length} мест</p>
             <button
-              onClick={() => setShowAddVenue(!showAddVenue)}
+              onClick={() => {
+                setShowAddVenue(false);
+                setNewVenue({ name: '', city: '', district: '' });
+                setVenueCoords(null);
+                setManualCoords({ lat: '', lng: '' });
+              }}
               className="px-4 py-2 rounded-xl bg-[var(--color-brand)] text-white text-sm font-semibold"
             >
               {showAddVenue ? 'Отмена' : '+ Добавить'}
@@ -268,6 +340,43 @@ export function ModerationTab() {
                 className="w-full px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium disabled:opacity-50"
               >
                 {geocoding ? 'Определяем координаты...' : '📍 Определить координаты по адресу'}
+              </button>
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Широта (lat)</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    placeholder="55.7558"
+                    value={manualCoords.lat}
+                    onChange={e => setManualCoords(c => ({ ...c, lat: e.target.value }))}
+                    className="input-field text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Долгота (lng)</label>
+                  <input
+                    type="number"
+                    step="0.000001"
+                    placeholder="37.6173"
+                    value={manualCoords.lng}
+                    onChange={e => setManualCoords(c => ({ ...c, lng: e.target.value }))}
+                    className="input-field text-sm"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const lat = parseFloat(manualCoords.lat);
+                  const lng = parseFloat(manualCoords.lng);
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    setVenueCoords({ lat, lng });
+                  }
+                }}
+                className="w-full px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200"
+                disabled={!manualCoords.lat || !manualCoords.lng}
+              >
+                Использовать введённые координаты
               </button>
               {venueCoords && (
                 <div className="text-sm text-gray-500">
