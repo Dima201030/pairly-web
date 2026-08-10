@@ -1,11 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { UserProfile } from '@/lib/types';
 import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
@@ -35,6 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (profileDoc.exists()) {
           setProfile({ ...profileDoc.data(), uid: profileDoc.id } as UserProfile);
+        } else {
+          setProfile(null);
         }
       } else {
         setProfile(null);
@@ -44,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const { signInWithEmailAndPassword } = await import('firebase/auth');
     await signInWithEmailAndPassword(auth, email, password);
-  };
+  }, []);
 
-  const register = async (email: string, password: string, displayName: string, sport?: string) => {
+  const register = useCallback(async (email: string, password: string, displayName: string, sport?: string) => {
     const { createUserWithEmailAndPassword, updateProfile: updateAuthProfile } = await import('firebase/auth');
     const { Timestamp } = await import('firebase/firestore');
     
@@ -75,14 +79,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: Timestamp.fromDate(newProfile.createdAt),
     });
     setProfile(newProfile);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     const { signOut } = await import('firebase/auth');
     await signOut(auth);
-  };
+    router.push('/login');
+    router.refresh();
+  }, [router]);
 
-  const updateProfile = async (data: Partial<UserProfile>) => {
+  const updateProfile = useCallback(async (data: Partial<UserProfile>) => {
     if (!user || !profile) return;
     const { Timestamp } = await import('firebase/firestore');
     const updated = { ...profile, ...data };
@@ -91,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createdAt: Timestamp.fromDate(updated.createdAt),
     }, { merge: true });
     setProfile(updated);
-  };
+  }, [user, profile]);
 
   const isHost = profile?.role === 'host';
   const isModerator = profile?.role === 'moderator' || profile?.role === 'host';

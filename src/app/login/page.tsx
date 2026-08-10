@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
@@ -12,6 +13,7 @@ import { sportNames } from '@/lib/theme';
 
 export default function LoginPage() {
   const { login, register } = useAuth();
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,6 +36,8 @@ export default function LoginPage() {
       if (isLogin) {
         await login(form.email, form.password);
         setSuccess('Вход выполнен');
+        router.push('/');
+        router.refresh();
       } else {
         if (!form.displayName) {
           setError('Введите имя');
@@ -41,6 +45,8 @@ export default function LoginPage() {
         }
         await register(form.email, form.password, form.displayName, form.sport);
         setSuccess('Регистрация успешна');
+        router.push('/');
+        router.refresh();
       }
     } catch (err: any) {
       const msg = err.code === 'auth/user-not-found' ? 'Пользователь не найден' :
