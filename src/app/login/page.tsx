@@ -4,18 +4,18 @@ export const dynamic = 'force-dynamic';
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { useToast } from '@/components/ui/Toast';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { UserProfile, Sport } from '@/lib/types';
 import { sportNames } from '@/lib/theme';
 
-export function LoginPage() {
+export default function LoginPage() {
   const { login, register } = useAuth();
-  const { showToast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   
   const [form, setForm] = useState({
     email: '',
@@ -27,26 +27,28 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setSuccess('');
     
     try {
       if (isLogin) {
         await login(form.email, form.password);
-        showToast('Вход выполнен', 'success');
+        setSuccess('Вход выполнен');
       } else {
         if (!form.displayName) {
-          showToast('Введите имя', 'error');
+          setError('Введите имя');
           return;
         }
         await register(form.email, form.password, form.displayName, form.sport);
-        showToast('Регистрация успешна', 'success');
+        setSuccess('Регистрация успешна');
       }
-    } catch (error: any) {
-      const msg = error.code === 'auth/user-not-found' ? 'Пользователь не найден' :
-                  error.code === 'auth/wrong-password' ? 'Неверный пароль' :
-                  error.code === 'auth/email-already-in-use' ? 'Email уже зарегистрирован' :
-                  error.code === 'auth/weak-password' ? 'Пароль минимум 6 символов' :
-                  error.message;
-      showToast(msg, 'error');
+    } catch (err: any) {
+      const msg = err.code === 'auth/user-not-found' ? 'Пользователь не найден' :
+                  err.code === 'auth/wrong-password' ? 'Неверный пароль' :
+                  err.code === 'auth/email-already-in-use' ? 'Email уже зарегистрирован' :
+                  err.code === 'auth/weak-password' ? 'Пароль минимум 6 символов' :
+                  err.message;
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -58,6 +60,17 @@ export function LoginPage() {
         <h1 className="text-2xl font-bold text-center mb-6">
           {isLogin ? 'Вход в Pairly' : 'Регистрация'}
         </h1>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-3 p-3 bg-green-50 text-green-600 rounded-lg text-sm">
+            {success}
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
@@ -126,5 +139,3 @@ export function LoginPage() {
     </div>
   );
 }
-
-export default LoginPage;
