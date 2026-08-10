@@ -118,6 +118,8 @@ export interface SavedVenue {
   district: string;
   sport?: Sport;
   authorID?: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface ChatMessage {

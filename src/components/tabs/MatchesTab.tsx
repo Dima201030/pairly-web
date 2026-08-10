@@ -214,6 +214,19 @@ export function MatchesTab() {
                 {match.note && (
                   <p className="mt-2 text-sm text-gray-500 line-clamp-2">{match.note}</p>
                 )}
+
+                {(match.latitude !== 0 || match.longitude !== 0) && (
+                  <div className="mt-2 rounded-lg overflow-hidden border border-gray-100">
+                    <iframe
+                      width="100%"
+                      height="120"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${match.longitude - 0.008}%2C${match.latitude - 0.004}%2C${match.longitude + 0.008}%2C${match.latitude + 0.004}&layer=mapnik&marker=${match.latitude}%2C${match.longitude}`}
+                    />
+                  </div>
+                )}
               </div>
               
               <div className="flex-shrink-0 flex flex-col items-end gap-2 sm:w-40">

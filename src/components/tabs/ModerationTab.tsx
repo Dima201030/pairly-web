@@ -1,8 +1,8 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc } from 'firebase/firestore';
-import { UserProfile, UserRole, Tournament, Sport, SkillLevel, SupportChat, SupportChatStatus } from '@/lib/types';
+import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc } from 'firebase/firestore';
+import { UserProfile, UserRole, Tournament, SavedVenue } from '@/lib/types';
 import { useEffect, useState } from 'react';
 
 export function ModerationTab() {
@@ -13,12 +13,16 @@ export function ModerationTab() {
   const [usersLoading, setUsersLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [tournamentsLoading, setTournamentsLoading] = useState(true);
-  const [supportChats, setSupportChats] = useState<SupportChat[]>([]);
-  const [supportLoading, setSupportLoading] = useState(true);
+  const [venues, setVenues] = useState<SavedVenue[]>([]);
+  const [venuesLoading, setVenuesLoading] = useState(true);
+  const [showAddVenue, setShowAddVenue] = useState(false);
+  const [newVenue, setNewVenue] = useState({ name: '', city: '', district: '' });
+  const [geocoding, setGeocoding] = useState(false);
+  const [venueCoords, setVenueCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if (!profile) return;
-    
+
     const usersQ = query(collection(db, 'users'), orderBy('createdAt'), limit(500));
     const usersUnsub = onSnapshot(usersQ, (snap) => {
       let data = snap.docs.map(d => ({ uid: d.id, ...d.data() } as UserProfile));
@@ -36,13 +40,13 @@ export function ModerationTab() {
       setTournamentsLoading(false);
     });
 
-    const supportQ = query(collection(db, 'supportChats'), orderBy('updatedAt', 'desc'), limit(100));
-    const supportUnsub = onSnapshot(supportQ, (snap) => {
-      setSupportChats(snap.docs.map(d => ({ id: d.id, ...d.data() } as SupportChat)));
-      setSupportLoading(false);
+    const venuesQ = query(collection(db, 'venues'), limit(200));
+    const venuesUnsub = onSnapshot(venuesQ, (snap) => {
+      setVenues(snap.docs.map(d => ({ id: d.id, ...d.data() } as SavedVenue)));
+      setVenuesLoading(false);
     });
 
-    return () => { usersUnsub(); tourneysUnsub(); supportUnsub(); };
+    return () => { usersUnsub(); tourneysUnsub(); venuesUnsub(); };
   }, [profile, isModerator, isHost]);
 
   if (!isStaff) {
@@ -62,6 +66,57 @@ export function ModerationTab() {
   const changeRole = async (uid: string, role: UserRole) => {
     await updateDoc(doc(db, 'users', uid), { role });
     showToast('Роль изменена', 'success');
+  };
+
+  const deleteVenue = async (venueId: string) => {
+    if (!confirm('Удалить это место?')) return;
+    await deleteDoc(doc(db, 'venues', venueId));
+    showToast('Место удалено', 'success');
+  };
+
+  const geocodeAddress = async () => {
+    const q = [newVenue.name, newVenue.district, newVenue.city]
+      .filter(s => s.trim()).join(', ');
+    if (!q) return;
+
+    setGeocoding(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`, {
+        headers: { 'Accept-Language': 'ru' }
+      });
+      const data = await res.json();
+      if (data.length > 0) {
+        setVenueCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+      } else {
+        showToast('Адрес не найден. Проверьте название.', 'error');
+      }
+    } catch {
+      showToast('Ошибка геокодирования', 'error');
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
+  const saveVenue = async () => {
+    if (!venueCoords || !newVenue.name.trim()) return;
+
+    try {
+      await addDoc(collection(db, 'venues'), {
+        name: newVenue.name.trim(),
+        city: newVenue.city.trim(),
+        district: newVenue.district.trim(),
+        sport: null,
+        authorID: profile?.uid || null,
+        latitude: venueCoords.lat,
+        longitude: venueCoords.lng,
+      });
+      showToast('Место добавлено!', 'success');
+      setShowAddVenue(false);
+      setNewVenue({ name: '', city: '', district: '' });
+      setVenueCoords(null);
+    } catch {
+      showToast('Ошибка при сохранении', 'error');
+    }
   };
 
   const roleColors: Record<string, string> = {
@@ -171,29 +226,102 @@ export function ModerationTab() {
         </div>
       )}
 
-      {activeSection === 'support' && (
-        <div className="space-y-3">
-          {supportLoading ? (
-            <div className="flex items-center justify-center py-8">Загрузка...</div>
-          ) : supportChats.map(chat => (
-            <div key={chat.id} className="card p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold">{chat.userName}</p>
-                  <p className="text-sm text-gray-500">{chat.userCity} · {chat.unreadCount} новых</p>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${chat.status === 'waiting' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
-                  {chat.status === 'waiting' ? 'Ожидает' : 'В работе'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
       {activeSection === 'venues' && (
-        <div className="text-center py-8 text-gray-500">
-          Управление клубами в разработке
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500">{venues.length} мест</p>
+            <button
+              onClick={() => setShowAddVenue(!showAddVenue)}
+              className="px-4 py-2 rounded-xl bg-[var(--color-brand)] text-white text-sm font-semibold"
+            >
+              {showAddVenue ? 'Отмена' : '+ Добавить'}
+            </button>
+          </div>
+
+          {showAddVenue && (
+            <div className="card p-4 space-y-3">
+              <h3 className="font-semibold">Новое место</h3>
+              <input
+                type="text"
+                placeholder="Название клуба *"
+                value={newVenue.name}
+                onChange={e => setNewVenue(v => ({ ...v, name: e.target.value }))}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Город"
+                value={newVenue.city}
+                onChange={e => setNewVenue(v => ({ ...v, city: e.target.value }))}
+                className="input-field"
+              />
+              <input
+                type="text"
+                placeholder="Район"
+                value={newVenue.district}
+                onChange={e => setNewVenue(v => ({ ...v, district: e.target.value }))}
+                className="input-field"
+              />
+              <button
+                onClick={geocodeAddress}
+                disabled={!newVenue.name.trim() || geocoding}
+                className="w-full px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium disabled:opacity-50"
+              >
+                {geocoding ? 'Определяем координаты...' : '📍 Определить координаты по адресу'}
+              </button>
+              {venueCoords && (
+                <div className="text-sm text-gray-500">
+                  Координаты: {venueCoords.lat.toFixed(5)}, {venueCoords.lng.toFixed(5)}
+                  <div className="mt-2 rounded-xl overflow-hidden border border-gray-200">
+                    <iframe
+                      width="100%"
+                      height="200"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${venueCoords.lng - 0.01}%2C${venueCoords.lat - 0.005}%2C${venueCoords.lng + 0.01}%2C${venueCoords.lat + 0.005}&layer=mapnik&marker=${venueCoords.lat}%2C${venueCoords.lng}`}
+                    />
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={saveVenue}
+                disabled={!venueCoords || !newVenue.name.trim()}
+                className="w-full px-4 py-3 rounded-xl bg-[var(--color-brand)] text-white font-semibold disabled:opacity-50"
+              >
+                Сохранить
+              </button>
+            </div>
+          )}
+
+          {venuesLoading ? (
+            <div className="flex items-center justify-center py-8">Загрузка...</div>
+          ) : venues.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p className="font-medium">Мест пока нет</p>
+              <p className="text-sm mt-1">Добавьте первое место для игры</p>
+            </div>
+          ) : (
+            venues.map(v => (
+              <div key={v.id} className="card p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{v.name}</p>
+                  <p className="text-sm text-gray-500">{v.city}{v.district ? ` · ${v.district}` : ''}</p>
+                  {(v.latitude !== 0 || v.longitude !== 0) && (
+                    <p className="text-xs text-gray-400 mt-0.5 font-mono">
+                      {v.latitude?.toFixed(5)}, {v.longitude?.toFixed(5)}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={() => deleteVenue(v.id)}
+                  className="px-3 py-1.5 text-sm rounded-lg bg-red-100 text-red-700 font-medium flex-shrink-0"
+                >
+                  Удалить
+                </button>
+              </div>
+            ))
+          )}
         </div>
       )}
     </div>
