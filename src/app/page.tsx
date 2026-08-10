@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { MatchesTab } from '@/components/tabs/MatchesTab';
 import { CreateMatchTab } from '@/components/tabs/CreateMatchTab';
@@ -20,11 +21,18 @@ const tabConfig: { id: Tab; label: string; icon: string; href?: string }[] = [
 ];
 
 export default function HomePage() {
-  const { isStaff, isModerator, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('matches');
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
   const visibleTabs = tabConfig.filter(t => {
-    if (t.id === 'moderation') return isStaff;
+    // We'll check isStaff inside the component via useAuth
     return true;
   });
 
@@ -35,6 +43,18 @@ export default function HomePage() {
       </div>
     );
   }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
+  }
+
+  // Need isStaff for moderation tab visibility
+  const { isStaff } = useAuth();
+
+  const filteredTabs = tabConfig.filter(t => {
+    if (t.id === 'moderation') return isStaff;
+    return true;
+  });
 
   const renderTab = () => {
     switch (activeTab) {
@@ -55,7 +75,7 @@ export default function HomePage() {
         
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom z-50" role="navigation" aria-label="Основная навигация">
           <div className="grid grid-cols-5 gap-1 px-2 py-2">
-            {visibleTabs.map((tab) => (
+            {filteredTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
