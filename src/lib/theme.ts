@@ -7,11 +7,11 @@ export const colors = {
   brandBlueDark: '#0077CC',
   brandBlueLight: '#33AEFF',
 
-  background: '#0A0F14',
-  surface: '#12181F',
-  surfaceSecondary: '#1A222D',
+  background: '#000000',
+  surface: '#0D0D0D',
+  surfaceSecondary: '#1A1A1A',
 
-  textPrimary: '#F0F4F8',
+  textPrimary: '#FFFFFF',
   textSecondary: '#A0AEC0',
   textTertiary: '#718096',
 
@@ -24,8 +24,8 @@ export const colors = {
   yellow: '#F6E05E',
   yellowLight: '#FAF089',
 
-  border: '#2D3748',
-  divider: '#1A202C',
+  border: '#2D2D2D',
+  divider: '#1A1A1A',
 
   sport: {
     padel: '#00D4AA',
