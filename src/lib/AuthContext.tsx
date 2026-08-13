@@ -1,10 +1,10 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { UserProfile } from '@/lib/types';
-import { doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore';
+import { UserProfile, Sport } from '@/lib/types';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -29,24 +29,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const profileUnsubRef = useRef<(() => void) | null>(null);
+
+  // Восстановление старых аккаунтов, у которых профиль так и не создался
+  // (до исправления register отправлял role, и правила отклоняли create).
+  // Создаём минимальный док БЕЗ role/blocked — правила это разрешают.
+  const createMissingProfile = useCallback(async (fuser: FirebaseUser) => {
+    const { Timestamp } = await import('firebase/firestore');
+    const name = fuser.displayName || (fuser.email ? fuser.email.split('@')[0] : 'Пользователь');
+    try {
+      setProfile({
+        uid: fuser.uid,
+        displayName: name,
+        email: fuser.email ?? '',
+        city: '',
+        sport: undefined,
+        level: 'any',
+        rating: 5.0,
+        createdAt: new Date(),
+        discoveredSports: [],
+        role: 'user',
+        blocked: false,
+      } as UserProfile);
+      await setDoc(doc(db, 'users', fuser.uid), {
+        uid: fuser.uid,
+        displayName: name,
+        email: fuser.email ?? '',
+        city: '',
+        level: 'any',
+        rating: 5.0,
+        createdAt: Timestamp.fromDate(new Date()),
+        discoveredSports: [],
+      }, { merge: true });
+    } catch (err) {
+      console.error('[AuthContext] restore profile doc failed', err);
+    }
+  }, []);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       setUser(firebaseUser);
+      profileUnsubRef.current?.();
+      profileUnsubRef.current = null;
+
       if (firebaseUser) {
-        const profileDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (profileDoc.exists()) {
-          setProfile({ ...profileDoc.data(), uid: profileDoc.id } as UserProfile);
-        } else {
-          setProfile(null);
-        }
+        profileUnsubRef.current = onSnapshot(
+          doc(db, 'users', firebaseUser.uid),
+          (snap) => {
+            if (snap.exists()) {
+              setProfile({ ...snap.data(), uid: snap.id } as UserProfile);
+            } else {
+              setProfile(null);
+              createMissingProfile(firebaseUser);
+            }
+          },
+          () => {
+            setProfile(null);
+          }
+        );
       } else {
         setProfile(null);
       }
       setLoading(false);
     });
-    return unsubscribe;
-  }, []);
+
+    return () => {
+      unsubscribe();
+      profileUnsubRef.current?.();
+      profileUnsubRef.current = null;
+    };
+  }, [createMissingProfile]);
 
   const login = useCallback(async (email: string, password: string) => {
     const { signInWithEmailAndPassword } = await import('firebase/auth');
@@ -59,13 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateAuthProfile(result.user, { displayName });
-    
+
     const newProfile: UserProfile = {
       uid: result.user.uid,
       displayName,
       email,
       city: '',
-      sport: sport as any,
+      sport: sport as Sport | undefined,
       level: 'any',
       rating: 5.0,
       createdAt: new Date(),
@@ -73,15 +125,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: 'user',
       blocked: false,
     };
-    
-    await setDoc(doc(db, 'users', result.user.uid), {
-      ...newProfile,
-      createdAt: Timestamp.fromDate(newProfile.createdAt),
-    });
+
+    // Профиль отражаем локально сразу, чтобы не было «вечного лоадера»
+    // между созданием аккаунта и подпиской onSnapshot. Если запись в БД
+    // падает — аккаунт уже существует, док создастся при первом updateProfile
+    // (merge), а не-существующий док подсветим состоянием !profile.
     setProfile(newProfile);
+    try {
+      // ВАЖНО: правила Firestore запрещают создавать профиль с полем `role`
+      // (вектор само-эскалации). `role`/`blocked` — серверно-контролируемые:
+      // не шлём их в док, иначе create отклоняется и регистрация «проходит»,
+      // но у пользователя нет профиля → нельзя записаться ни на что (M5-аналог).
+      const serverFields = new Set(['role', 'blocked']);
+      const profileData = Object.fromEntries(
+        Object.entries(newProfile).filter(([key]) => !serverFields.has(key))
+      );
+      await setDoc(doc(db, 'users', result.user.uid), {
+        ...profileData,
+        createdAt: Timestamp.fromDate(newProfile.createdAt),
+      }, { merge: true });
+    } catch (err) {
+      // Аккаунт уже создан; док дозапишется при первом updateProfile (merge).
+      // Ошибка не должна валить регистрацию — пользователь видит приложение.
+      console.error('[AuthContext] profile setDoc failed for new user', err);
+    }
   }, []);
 
   const logout = useCallback(async () => {
+    // Снимаем подписку на профиль сразу, не дожидаясь onAuthStateChanged:
+    // слушатель не должен жить после выхода.
+    profileUnsubRef.current?.();
+    profileUnsubRef.current = null;
+    setProfile(null);
     const { signOut } = await import('firebase/auth');
     await signOut(auth);
     router.push('/login');
@@ -92,8 +167,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user || !profile) return;
     const { Timestamp } = await import('firebase/firestore');
     const updated = { ...profile, ...data };
+    // Свои правки не шлём серверно-контролируемые role/blocked: это и запрещает
+    // правила, и «чинит» старые аккаунты, у которых док так и не создался
+    // (merge-создание с полем role отклоняется правилами).
+    const serverFields = new Set(['role', 'blocked']);
+    const profileData = Object.fromEntries(
+      Object.entries(updated).filter(([key]) => !serverFields.has(key))
+    );
     await setDoc(doc(db, 'users', user.uid), {
-      ...updated,
+      ...profileData,
       createdAt: Timestamp.fromDate(updated.createdAt),
     }, { merge: true });
     setProfile(updated);

@@ -5,8 +5,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { sportNames, levelNames, sportIcons } from '@/lib/theme';
 import { Sport, SkillLevel, SavedVenue } from '@/lib/types';
-import { collection, addDoc, Timestamp, query, getDocs } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { EmptyState } from '@/components/ui/EmptyState';
+
+const TWO_HOURS_FROM_NOW = Date.now() + 2 * 60 * 60 * 1000;
 
 export function CreateMatchTab() {
   const { profile } = useAuth();
@@ -18,7 +21,7 @@ export function CreateMatchTab() {
   const [form, setForm] = useState({
     sport: 'padel' as Sport,
     venueId: '',
-    startDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    startDate: new Date(TWO_HOURS_FROM_NOW),
     level: 'middle' as SkillLevel,
     openSpots: 1,
     note: '',
@@ -74,7 +77,7 @@ export function CreateMatchTab() {
 
       showToast('Заявка создана!', 'success');
       setForm(f => ({ ...f, venueId: '', note: '' }));
-    } catch (error) {
+    } catch {
       showToast('Ошибка при создании', 'error');
     } finally {
       setLoading(false);
@@ -84,27 +87,32 @@ export function CreateMatchTab() {
   if (!profile) {
     return (
       <div className="flex-1 flex items-center justify-center pb-24">
-        <div className="text-center px-4">
-          <div className="text-4xl mb-3">🔐</div>
-          <p className="text-lg font-medium">Войдите, чтобы создать заявку</p>
+        <div className="text-center px-4 animate-in">
+          <div className="text-5xl mb-3">🔐</div>
+          <p className="text-lg font-medium text-[var(--color-text-secondary)]">Войдите, чтобы создать заявку</p>
         </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-6">
-      <h1 className="text-2xl font-bold">Новая заявка</h1>
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-5 animate-in">
+      <div className="mb-4">
+        <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Новая заявка</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Опишите игру — и игроки смогут записаться</p>
+      </div>
 
-      <div className="card p-4 space-y-4">
-        <h3 className="font-semibold text-lg">Спорт</h3>
+      <Section step="1" title="Спорт">
         <div className="flex gap-2 overflow-x-auto pb-2" role="radiogroup">
           {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(sport => (
-            <label key={sport} className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 cursor-pointer transition-colors ${
-              form.sport === sport
-                ? 'border-[var(--color-brand)] bg-[var(--color-brand-light)]'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}>
+            <label
+              key={sport}
+              className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all press-scale ${
+                form.sport === sport
+                  ? 'border-[var(--color-brand)] bg-[var(--color-brand)]/10 shadow-[0_0_0_1px_var(--color-brand)]/20'
+                  : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
+              }`}
+            >
               <input
                 type="radio"
                 name="sport"
@@ -118,21 +126,22 @@ export function CreateMatchTab() {
             </label>
           ))}
         </div>
-      </div>
+      </Section>
 
-      <div className="card p-4 space-y-4">
-        <h3 className="font-semibold text-lg">Место</h3>
+      <Section step="2" title="Место">
         {venuesLoading ? (
-          <div className="text-center py-4 text-gray-500">Загрузка клубов...</div>
+          <div className="text-center py-6 text-[var(--color-text-tertiary)]">Загрузка клубов...</div>
         ) : filteredVenues.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">
-            <p className="font-medium">Нет клубов</p>
-            <p className="text-sm mt-1">Клубы добавляются через «Модерация» → «Клубы»</p>
-          </div>
+          <EmptyState
+            icon="🏟️"
+            title="Нет клубов для этого спорта"
+            description="Клубы добавляются через «Модерация» → «Клубы»"
+            variant="compact"
+          />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Клуб *</label>
+              <label className="label">Клуб *</label>
               <select
                 value={form.venueId}
                 onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
@@ -147,20 +156,15 @@ export function CreateMatchTab() {
             </div>
 
             {selectedVenue && (selectedVenue.latitude !== 0 || selectedVenue.longitude !== 0) && (
-              <div className="rounded-xl overflow-hidden border border-gray-200">
-                <iframe
-                  width="100%"
-                  height="200"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedVenue.longitude - 0.01}%2C${selectedVenue.latitude - 0.005}%2C${selectedVenue.longitude + 0.01}%2C${selectedVenue.latitude + 0.005}&layer=mapnik&marker=${selectedVenue.latitude}%2C${selectedVenue.longitude}`}
-                />
-              </div>
+              <MapPreview
+                lat={selectedVenue.latitude}
+                lng={selectedVenue.longitude}
+                name={selectedVenue.name}
+              />
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Дата и время *</label>
+              <label className="label">Дата и время *</label>
               <input
                 type="datetime-local"
                 value={form.startDate.toISOString().slice(0, 16)}
@@ -171,13 +175,12 @@ export function CreateMatchTab() {
             </div>
           </div>
         )}
-      </div>
+      </Section>
 
-      <div className="card p-4 space-y-4">
-        <h3 className="font-semibold text-lg">Уровень и места</h3>
+      <Section step="3" title="Уровень и места">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Уровень</label>
+            <label className="label">Уровень</label>
             <select
               value={form.level}
               onChange={e => setForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
@@ -189,7 +192,7 @@ export function CreateMatchTab() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Свободных мест</label>
+            <label className="label">Свободных мест</label>
             <input
               type="number"
               min="1"
@@ -203,7 +206,7 @@ export function CreateMatchTab() {
 
         {form.sport === 'tennis' && (
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Формат</label>
+            <label className="label">Формат</label>
             <select
               value={form.tennisType}
               onChange={e => setForm(f => ({ ...f, tennisType: e.target.value as 'singles' | 'doubles' }))}
@@ -214,10 +217,9 @@ export function CreateMatchTab() {
             </select>
           </div>
         )}
-      </div>
+      </Section>
 
-      <div className="card p-4">
-        <label className="block text-sm font-medium text-gray-600 mb-1">Комментарий (необязательно)</label>
+      <Section step="4" title="Комментарий (необязательно)">
         <textarea
           value={form.note}
           onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
@@ -225,15 +227,59 @@ export function CreateMatchTab() {
           placeholder="Дополнительная информация..."
           className="input-field resize-none"
         />
-      </div>
+      </Section>
 
       <button
         type="submit"
         disabled={loading || !form.venueId}
-        className="btn-primary w-full py-4 text-lg disabled:opacity-50"
+        className="btn btn-brand-gradient btn-full btn-lg press-scale"
       >
         {loading ? 'Создание...' : 'Создать заявку'}
       </button>
     </form>
+  );
+}
+
+interface SectionProps {
+  step: string;
+  title: string;
+  children: React.ReactNode;
+}
+
+function Section({ step, title, children }: SectionProps) {
+  return (
+    <div className="card p-5 space-y-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--color-divider)]" aria-hidden="true" />
+      <div className="absolute top-0 left-0 h-0.5 brand-gradient w-16" aria-hidden="true" />
+      <h3 className="font-semibold text-lg flex items-center gap-2.5">
+        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-brand)]/15 text-[var(--color-brand)] text-sm font-bold flex items-center justify-center">
+          {step}
+        </span>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+interface MapPreviewProps {
+  lat: number;
+  lng: number;
+  name: string;
+}
+
+function MapPreview({ lat, lng, name }: MapPreviewProps) {
+  return (
+    <div className="rounded-xl overflow-hidden border border-[var(--color-border)]">
+      <iframe
+        width="100%"
+        height="200"
+        style={{ border: 0 }}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01}%2C${lat - 0.005}%2C${lng + 0.01}%2C${lat + 0.005}&layer=mapnik&marker=${lat}%2C${lng}`}
+        title={`Карта: ${name}`}
+      />
+    </div>
   );
 }

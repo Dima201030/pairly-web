@@ -2,11 +2,15 @@
 
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
-import { colors, sportNames, levelNames, sportColors, sportIcons, tournamentStatusNames } from '@/lib/theme';
+import { sportNames, levelNames, sportIcons, sportColors, tournamentStatusNames } from '@/lib/theme';
 import { Tournament, Sport, SkillLevel, NTRPRange } from '@/lib/types';
-import { collection, query, where, orderBy, onSnapshot, Timestamp, addDoc, limit } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp, addDoc, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { EmptyState } from '@/components/ui/EmptyState';
+
+const DEFAULT_START = Date.now() + 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_DEADLINE = Date.now() + 6 * 24 * 60 * 60 * 1000;
 
 export function TournamentsTab() {
   const { profile, isStaff } = useAuth();
@@ -14,14 +18,17 @@ export function TournamentsTab() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
+  const createBtnRef = useRef<HTMLButtonElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
   const [form, setForm] = useState({
     title: '',
     sport: 'padel' as Sport,
     city: '',
     venue: '',
     district: '',
-    startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    regDeadline: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+    startDate: new Date(DEFAULT_START),
+    regDeadline: new Date(DEFAULT_DEADLINE),
     level: 'middle' as SkillLevel,
     ntrpRange: null as NTRPRange | null,
     maxParticipants: 16,
@@ -30,8 +37,7 @@ export function TournamentsTab() {
 
   useEffect(() => {
     if (!profile) return;
-    setLoading(true);
-    
+
     const q = query(
       collection(db, 'tournaments'),
       orderBy('startDate', 'desc'),
@@ -88,12 +94,46 @@ export function TournamentsTab() {
       setShowCreate(false);
       setForm({
         title: '', sport: 'padel', city: '', venue: '', district: '',
-        startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        regDeadline: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+        startDate: new Date(DEFAULT_START),
+        regDeadline: new Date(DEFAULT_DEADLINE),
         level: 'middle', ntrpRange: null, maxParticipants: 16, note: '',
       });
-    } catch (error) {
+    } catch {
       showToast('Ошибка при создании', 'error');
+    }
+  };
+
+  const joinTournament = async (tournament: Tournament, leave: boolean) => {
+    if (!profile) { showToast('Войдите в аккаунт', 'error'); return; }
+    const tournamentRef = doc(db, 'tournaments', tournament.id);
+
+    setJoiningId(tournament.id);
+    try {
+      // Транзакция: проверка лимита участников выполняется атомарно с записью,
+      // чтобы не допустить переполнения турнира при одновременных записях.
+      await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(tournamentRef);
+        if (!snap.exists()) throw new Error('tournament_not_found');
+
+        const data = snap.data() as Partial<Tournament>;
+        const participants = data.participants || [];
+        const isJoined = participants.includes(profile.uid);
+
+        if (leave) {
+          if (!isJoined) return;
+          transaction.update(tournamentRef, { participants: arrayRemove(profile.uid) });
+        } else {
+          if (isJoined) throw new Error('already_joined');
+          const maxParticipants = data.maxParticipants ?? tournament.maxParticipants;
+          if (participants.length >= maxParticipants) throw new Error('tournament_full');
+          transaction.update(tournamentRef, { participants: arrayUnion(profile.uid) });
+        }
+      });
+      showToast(leave ? 'Вы вышли из турнира' : 'Вы записаны!', 'success');
+    } catch {
+      showToast(leave ? 'Не удалось выйти' : 'Не удалось записаться', 'error');
+    } finally {
+      setJoiningId(null);
     }
   };
 
@@ -101,28 +141,63 @@ export function TournamentsTab() {
     weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
   }).format(date);
 
-  const statusColors: Record<string, string> = {
-    open: 'bg-green-100 text-green-700',
-    finished: 'bg-gray-100 text-gray-700',
-    cancelled: 'bg-red-100 text-red-700',
-  };
+  useEffect(() => {
+    if (!showCreate) return;
+    const getFocusables = () => {
+      if (!modalRef.current) return [];
+      return Array.from(
+        modalRef.current.querySelectorAll<HTMLElement>('button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])')
+      ).filter(el => !el.hasAttribute('disabled'));
+    };
+
+    const prevFocus = document.activeElement as HTMLElement | null;
+    const createBtn = createBtnRef.current;
+    getFocusables()[0]?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowCreate(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const els = getFocusables();
+      if (els.length === 0) return;
+      if (e.shiftKey && document.activeElement === els[0]) {
+        e.preventDefault();
+        els[els.length - 1].focus();
+      } else if (!e.shiftKey && document.activeElement === els[els.length - 1]) {
+        e.preventDefault();
+        els[0].focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      (prevFocus ?? createBtn)?.focus();
+    };
+  }, [showCreate]);
 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow text-2xl text-[var(--color-brand)]">Загрузка турниров...</div>
+        <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка турниров...</div>
       </div>
     );
   }
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Турниры</h1>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Турниры</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Соревнования по вашим любимым видам спорта</p>
+        </div>
         {isStaff && (
           <button
+            ref={createBtnRef}
             onClick={() => setShowCreate(true)}
-            className="btn-primary"
+            className="btn btn-brand-gradient press-scale"
           >
             + Создать турнир
           </button>
@@ -130,9 +205,10 @@ export function TournamentsTab() {
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true">
-          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-xl font-bold mb-4">Новый турнир</h2>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="tournaments-modal-title" ref={modalRef}>
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
+            <h2 id="tournaments-modal-title" className="brand-gradient-text text-xl font-bold mb-4">Новый турнир</h2>
             <form onSubmit={createTournament} className="space-y-4">
               <input
                 type="text"
@@ -225,40 +301,61 @@ export function TournamentsTab() {
       )}
 
       {tournaments.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-gray-500">
-          <div className="text-4xl mb-3">🏆</div>
-          <p className="text-lg font-medium">Турниров пока нет</p>
-          {isStaff && <p className="text-sm mt-1">Создай первый турнир!</p>}
-        </div>
+        <EmptyState
+          icon="🏆"
+          title="Турниров пока нет"
+          description={isStaff ? 'Создайте первый турнир!' : 'Организаторы скоро добавят соревнования'}
+        />
       ) : (
         <div className="space-y-3" role="list">
-          {tournaments.map(t => (
-            <article key={t.id} className="card p-4" role="listitem">
-              <div className="flex items-start justify-between gap-4">
+          {tournaments.map((t, index) => {
+            const sportColor = sportColors[t.sport];
+            const isJoined = t.participants.includes(profile?.uid || '');
+            const spotsPct = t.maxParticipants > 0
+              ? Math.max(0, Math.min(100, Math.round((t.participants.length / t.maxParticipants) * 100)))
+              : 0;
+            return (
+            <article key={t.id} className={`card p-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : ''}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border"
+                  style={{
+                    backgroundColor: `${sportColor}14`,
+                    borderColor: `${sportColor}40`,
+                    boxShadow: `0 4px 16px -6px ${sportColor}55`,
+                  }}>
+                  <span aria-hidden="true">{sportIcons[t.sport]}</span>
+                </div>
+
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
                     <h3 className="font-semibold text-lg truncate">{t.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${t.status === 'open' ? 'bg-green-100 text-green-700' : t.status === 'finished' ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-700'}`}>
+                    <span className={`badge shrink-0 ${t.status === 'open' ? 'badge-green' : t.status === 'finished' ? 'badge-gray' : 'badge-red'}`}>
                       {tournamentStatusNames[t.status] || t.status}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 mb-2">{t.venue}, {t.city} · {t.district}</p>
-                  
+                  <p className="text-sm text-[var(--color-text-secondary)] mb-2">{t.venue}, {t.city} · {t.district}</p>
+
                   <div className="flex flex-wrap items-center gap-3 text-sm mb-2">
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-[var(--color-text-secondary)]">
                       <span aria-hidden="true">{sportIcons[t.sport]}</span>
                       {sportNames[t.sport]}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <span className="badge badge-gray">
                       {levelNames[t.level]}
                     </span>
-                    <span className="text-gray-600 flex items-center gap-1">
+                    <span className="text-[var(--color-text-secondary)] flex items-center gap-1">
                       <span aria-hidden="true">👥</span>
                       {t.participants.length}/{t.maxParticipants}
                     </span>
                   </div>
-                  
-                  <div className="flex items-center gap-3 text-sm text-gray-500">
+
+                  {isJoined && (
+                    <span className="pill brand-gradient text-xs text-[var(--color-text-on-brand)]">
+                      ✓ Вы участвуете
+                    </span>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-text-tertiary)] mt-2">
                     <span className="flex items-center gap-1">
                       <span aria-hidden="true">📅</span>
                       {formatDate(t.startDate)}
@@ -268,20 +365,39 @@ export function TournamentsTab() {
                       Рег. до {formatDate(t.registrationDeadline || t.startDate)}
                     </span>
                   </div>
-                  
-                  {t.note && <p className="mt-2 text-sm text-gray-500 line-clamp-2">{t.note}</p>}
+
+                  {t.note && <p className="mt-2 text-sm text-[var(--color-text-secondary)] line-clamp-2">{t.note}</p>}
+
+                  <div className="h-1.5 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden mt-3">
+                    <div className="h-full brand-gradient transition-all duration-500" style={{ width: `${spotsPct}%` }} />
+                  </div>
                 </div>
-                
-                {t.participants.includes(profile?.uid || '') ? (
-                  <button className="btn-secondary whitespace-nowrap" disabled>Вы записаны</button>
+              </div>
+
+              <div className="flex justify-end mt-3 border-t border-[var(--color-divider)] pt-3">
+                {isJoined ? (
+                  <button
+                    onClick={() => joinTournament(t, true)}
+                    disabled={joiningId === t.id}
+                    className="btn btn-outline btn-sm"
+                  >
+                    {joiningId === t.id ? 'Отмена...' : 'Покинуть'}
+                  </button>
                 ) : t.status === 'open' && t.participants.length < t.maxParticipants ? (
-                  <button className="btn-primary whitespace-nowrap">Записаться</button>
+                  <button
+                    onClick={() => joinTournament(t, false)}
+                    disabled={joiningId === t.id}
+                    className="btn btn-primary btn-sm"
+                  >
+                    {joiningId === t.id ? 'Запись...' : 'Записаться'}
+                  </button>
                 ) : (
-                  <button className="btn-secondary whitespace-nowrap" disabled>Мест нет</button>
+                  <button className="btn btn-secondary btn-sm" disabled>Мест нет</button>
                 )}
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -3,13 +3,14 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, onSnapshot, limit, updateDoc, doc, getDoc, Timestamp } from 'firebase/firestore';
-import { UserProfile, Match, Tournament, Sport, SkillLevel } from '@/lib/types';
+import { collection, query, where, orderBy, onSnapshot, limit } from 'firebase/firestore';
+import { Match, Tournament, Sport, SkillLevel } from '@/lib/types';
+import { formatDate } from '@/lib/format';
 import { useEffect, useState } from 'react';
 import { sportNames, levelNames, roleNames, sportIcons, sportColors } from '@/lib/theme';
 
 export function ProfileTab() {
-  const { profile, user, logout, updateProfile, isModerator, isHost, isSupport } = useAuth();
+  const { profile, user, logout, updateProfile } = useAuth();
   const { showToast } = useToast();
   const [myMatches, setMyMatches] = useState<Match[]>([]);
   const [myTournaments, setMyTournaments] = useState<Tournament[]>([]);
@@ -21,12 +22,10 @@ export function ProfileTab() {
     sport: '' as Sport | '',
     level: 'any' as SkillLevel,
     ntrp: '',
-    bio: '',
   });
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
 
     const matchesQ = query(
       collection(db, 'matches'),
@@ -36,6 +35,7 @@ export function ProfileTab() {
     );
     const matchesUnsub = onSnapshot(matchesQ, (snap) => {
       setMyMatches(snap.docs.map(d => ({ id: d.id, ...d.data(), startDate: d.data().startDate?.toDate?.() } as Match)));
+      setLoading(false);
     });
 
     const tourneysQ = query(
@@ -48,17 +48,6 @@ export function ProfileTab() {
       setMyTournaments(snap.docs.map(d => ({ id: d.id, ...d.data(), startDate: d.data().startDate?.toDate?.() } as Tournament)));
     });
 
-    if (profile) {
-      setEditForm({
-        displayName: profile.displayName,
-        city: profile.city,
-        sport: profile.sport || '',
-        level: profile.level,
-        ntrp: profile.ntrp?.toString() || '',
-        bio: '',
-      });
-    }
-    setLoading(false);
     return () => { matchesUnsub(); tourneysUnsub(); };
   }, [user, profile]);
 
@@ -75,23 +64,56 @@ export function ProfileTab() {
     showToast('Профиль сохранён', 'success');
   };
 
-  const formatDate = (date: Date) => new Intl.DateTimeFormat('ru-RU', {
-    weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-  }).format(date);
+  const toggleEdit = () => {
+    if (!editing && profile) {
+      setEditForm({
+        displayName: profile.displayName,
+        city: profile.city,
+        sport: profile.sport || '',
+        level: profile.level,
+        ntrp: profile.ntrp?.toString() || '',
+      });
+    }
+    setEditing(!editing);
+  };
 
-  if (loading || !profile) {
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case 'moderator': return 'badge-blue';
+      case 'support': return 'badge-green';
+      case 'host': return 'badge-yellow';
+      default: return 'badge-gray';
+    }
+  };
+
+  if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center pb-24">
-        <div className="animate-pulse-slow text-2xl text-[var(--color-brand)]">Загрузка...</div>
+        <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex-1 flex items-center justify-center pb-24 px-4">
+        <div className="text-center animate-in">
+          <div className="text-5xl mb-3">👤</div>
+          <p className="text-lg font-medium text-[var(--color-text-secondary)]">Профиль не найден</p>
+          <p className="text-sm text-[var(--color-text-tertiary)] mt-1">
+            Попробуйте перезайти в аккаунт или обновить страницу.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-6">
-      <div className="card p-6">
+    <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-5 animate-in">
+      <div className="card p-5 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
         <div className="flex items-center gap-4">
-          <div className="w-24 h-24 rounded-2xl bg-[var(--color-brand-light)] flex items-center justify-center text-4xl text-[var(--color-brand)] font-bold">
+          <div className="relative w-24 h-24 rounded-2xl bg-[var(--color-brand)]/15 flex items-center justify-center text-4xl text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/30">
             {profile.displayName[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -99,18 +121,18 @@ export function ProfileTab() {
               <input
                 value={editForm.displayName}
                 onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
-                className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] rounded px-1"
+                className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] rounded px-1 text-[var(--color-text-primary)]"
               />
             ) : (
               <h1 className="text-2xl font-bold truncate">{profile.displayName}</h1>
             )}
-            <p className="text-gray-500 text-sm truncate">{profile.email || 'Email не указан'}</p>
-            <div className="flex items-center gap-4 mt-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${isModerator ? 'bg-[var(--color-brand)] text-white' : isSupport ? 'bg-green-100 text-green-700' : isHost ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'}`}>
+            <p className="text-[var(--color-text-tertiary)] text-sm truncate">{profile.email || 'Email не указан'}</p>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <span className={`badge ${getRoleBadge(profile.role)}`}>
                 {roleNames[profile.role] || profile.role}
               </span>
               {profile.rating > 0 && (
-                <span className="flex items-center gap-1 text-yellow-600 font-semibold">
+                <span className="flex items-center gap-1 text-[var(--color-yellow)] font-semibold">
                   ⭐ {profile.rating.toFixed(1)}
                 </span>
               )}
@@ -118,26 +140,20 @@ export function ProfileTab() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 text-center">
-          <div className="p-3 bg-gray-50 rounded-xl">
-            <div className="text-2xl font-bold text-[var(--color-brand)]">{myMatches.length}</div>
-            <div className="text-xs text-gray-500">Матчей</div>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-xl">
-            <div className="text-2xl font-bold text-[var(--color-brand)]">{myTournaments.length}</div>
-            <div className="text-xs text-gray-500">Турниров</div>
-          </div>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <StatCard value={myMatches.length} label="Матчей" icon="🏟️" />
+          <StatCard value={myTournaments.length} label="Турниров" icon="🏆" />
         </div>
 
         <div className="mt-4 flex gap-2">
           <button
-            onClick={() => setEditing(!editing)}
-            className={`flex-1 px-4 py-2 rounded-xl font-semibold ${editing ? 'btn-secondary' : 'btn-primary'}`}
+            onClick={toggleEdit}
+            className={`btn flex-1 ${editing ? 'btn-secondary' : 'btn-primary'}`}
           >
             {editing ? 'Отмена' : 'Редактировать'}
           </button>
           {editing && (
-            <button onClick={saveProfile} className="btn-primary flex-1">
+            <button onClick={saveProfile} className="btn btn-brand-gradient flex-1">
               Сохранить
             </button>
           )}
@@ -145,7 +161,7 @@ export function ProfileTab() {
       </div>
 
       {editing && (
-        <div className="card p-6 space-y-4">
+        <div className="card p-5 space-y-4 animate-in">
           <h3 className="font-semibold text-lg">Редактирование профиля</h3>
           <input
             value={editForm.displayName}
@@ -191,68 +207,117 @@ export function ProfileTab() {
         </div>
       )}
 
-      <div className="card overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="font-semibold">Мои матчи</h3>
-          <span className="text-sm text-gray-500">{myMatches.length}</span>
-        </div>
-        {myMatches.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">Матчей пока нет</div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {myMatches.slice(0, 5).map(m => (
-              <div key={m.id} className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{sportIcons[m.sport]}</span>
-                  <div>
-                    <p className="font-medium">{m.venue}</p>
-                    <p className="text-sm text-gray-500">{formatDate(m.startDate)}</p>
-                  </div>
-                </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${m.participants.includes(user?.uid || '') ? 'bg-green-100 text-green-700' : 'bg-[var(--color-brand)] text-white'}`}>
-                  {m.participants.includes(user?.uid || '') ? 'В игре' : `${m.openSpots} мест`}
-                </span>
-              </div>
-            ))}
-          </div>
+      <ActivitySection
+        title="Мои матчи"
+        count={myMatches.length}
+        items={myMatches.slice(0, 5)}
+        renderItem={m => (
+          <ActivityItem
+            icon={sportIcons[m.sport]}
+            title={m.venue}
+            subtitle={formatDate(m.startDate)}
+            badge={
+              m.participants.includes(user?.uid || '')
+                ? <span className="badge badge-green">В игре</span>
+                : <span className="badge" style={{ backgroundColor: `${sportColors[m.sport]}20`, color: sportColors[m.sport] }}>{m.openSpots} мест</span>
+            }
+          />
         )}
-      </div>
+        emptyMessage="Матчей пока нет"
+      />
 
-      <div className="card overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="font-semibold">Мои турниры</h3>
-          <span className="text-sm text-gray-500">{myTournaments.length}</span>
-        </div>
-        {myTournaments.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">Турниров пока нет</div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {myTournaments.slice(0, 5).map(t => (
-              <div key={t.id} className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{sportIcons[t.sport]}</span>
-                  <div>
-                    <p className="font-medium">{t.title}</p>
-                    <p className="text-sm text-gray-500">{formatDate(t.startDate)}</p>
-                  </div>
-                </div>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                  {t.participants.length}/{t.maxParticipants}
-                </span>
-              </div>
-            ))}
-          </div>
+      <ActivitySection
+        title="Мои турниры"
+        count={myTournaments.length}
+        items={myTournaments.slice(0, 5)}
+        renderItem={t => (
+          <ActivityItem
+            icon={sportIcons[t.sport]}
+            title={t.title}
+            subtitle={formatDate(t.startDate)}
+            badge={<span className="badge badge-gray">{t.participants.length}/{t.maxParticipants}</span>}
+          />
         )}
-      </div>
+        emptyMessage="Турниров пока нет"
+      />
 
       <div className="card p-4">
         <button
           onClick={() => logout()}
-          className="w-full btn-danger"
+          className="btn btn-danger btn-full"
         >
           Выйти из аккаунта
         </button>
       </div>
+    </div>
+  );
+}
+
+interface StatCardProps {
+  value: number;
+  label: string;
+  icon: string;
+}
+
+function StatCard({ value, label, icon }: StatCardProps) {
+  return (
+    <div className="p-4 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)] text-center">
+      <div className="text-xl" aria-hidden="true">{icon}</div>
+      <div className="text-3xl font-bold brand-gradient-text">{value}</div>
+      <div className="text-xs text-[var(--color-text-tertiary)]">{label}</div>
+    </div>
+  );
+}
+
+interface ActivitySectionProps<T> {
+  title: string;
+  count: number;
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+  emptyMessage: string;
+}
+
+function ActivitySection<T>({ title, count, items, renderItem, emptyMessage }: ActivitySectionProps<T>) {
+  return (
+    <div className="card overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--color-divider)] flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2">
+          <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+          {title}
+        </h3>
+        <span className="badge bg-[var(--color-brand)]/15 text-[var(--color-brand)]">{count}</span>
+      </div>
+      {items.length === 0 ? (
+        <div className="p-8 text-center text-[var(--color-text-tertiary)]">{emptyMessage}</div>
+      ) : (
+        <div className="divide-y divide-[var(--color-divider)]">
+          {items.map((item, idx) => (
+            <div key={idx} className="px-4 py-3 flex items-center justify-between">
+              {renderItem(item)}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ActivityItemProps {
+  icon: string;
+  title: string;
+  subtitle: string;
+  badge: React.ReactNode;
+}
+
+function ActivityItem({ icon, title, subtitle, badge }: ActivityItemProps) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xl">{icon}</span>
+      <div className="min-w-0">
+        <p className="font-medium truncate">{title}</p>
+        <p className="text-sm text-[var(--color-text-tertiary)]">{subtitle}</p>
+      </div>
+      {badge}
     </div>
   );
 }

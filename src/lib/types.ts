@@ -8,13 +8,7 @@ export type NTRPRange = 'beginner' | 'intermediate' | 'advanced' | 'open';
 
 export type UserRole = 'user' | 'moderator' | 'support' | 'host';
 
-export type ReportReason = 'spam' | 'harassment' | 'cheating' | 'inappropriate' | 'other';
-
-export type ReportStatus = 'pending' | 'reviewed' | 'dismissed';
-
 export type TournamentStatus = 'open' | 'finished' | 'cancelled';
-
-export type SupportChatStatus = 'waiting' | 'assigned' | 'inProgress' | 'resolved' | 'closed';
 
 export interface UserProfile {
   uid: string;
@@ -72,45 +66,6 @@ export interface Tournament {
   status: TournamentStatus;
 }
 
-export interface Report {
-  id: string;
-  reporterID: string;
-  reporterName: string;
-  targetUserID: string;
-  targetUserName: string;
-  matchID?: string;
-  reason: ReportReason;
-  additionalText?: string;
-  createdAt: Date;
-  status: ReportStatus;
-}
-
-export interface SupportChat {
-  id: string;
-  userID: string;
-  userName: string;
-  userCity: string;
-  assignedStaffID?: string;
-  assignedStaffName?: string;
-  status: SupportChatStatus;
-  lastMessage?: string;
-  lastMessageDate?: Date;
-  unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface SupportMessage {
-  id: string;
-  chatID: string;
-  authorID: string;
-  authorName: string;
-  authorRole: UserRole;
-  text: string;
-  sentAt: Date;
-  read: boolean;
-}
-
 export interface SavedVenue {
   id: string;
   name: string;
@@ -120,20 +75,4 @@ export interface SavedVenue {
   authorID?: string;
   latitude: number;
   longitude: number;
-}
-
-export interface ChatMessage {
-  id: string;
-  matchID: string;
-  authorID: string;
-  authorName: string;
-  text: string;
-  sentAt: Date;
-}
-
-export interface PairlyNotification {
-  id: string;
-  title: string;
-  subtitle: string;
-  date: Date;
 }

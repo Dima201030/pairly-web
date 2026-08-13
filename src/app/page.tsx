@@ -12,7 +12,7 @@ import { ToastProvider } from '@/components/ui/Toast';
 
 type Tab = 'matches' | 'create' | 'tournaments' | 'moderation' | 'profile';
 
-const tabConfig: { id: Tab; label: string; icon: string; href?: string }[] = [
+const tabConfig: { id: Tab; label: string; icon: string }[] = [
   { id: 'matches', label: 'Матчи', icon: '🏟️' },
   { id: 'create', label: 'Заявка', icon: '➕' },
   { id: 'tournaments', label: 'Турниры', icon: '🏆' },
@@ -21,7 +21,7 @@ const tabConfig: { id: Tab; label: string; icon: string; href?: string }[] = [
 ];
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, isStaff } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('matches');
 
@@ -31,15 +31,10 @@ export default function HomePage() {
     }
   }, [user, loading, router]);
 
-  const visibleTabs = tabConfig.filter(t => {
-    // We'll check isStaff inside the component via useAuth
-    return true;
-  });
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)]">
-        <div className="animate-pulse-slow text-[var(--color-brand)] text-2xl">Pairly</div>
+        <div className="animate-pulse-slow brand-gradient-text text-3xl font-bold">Pairly</div>
       </div>
     );
   }
@@ -48,42 +43,48 @@ export default function HomePage() {
     return null; // Will redirect via useEffect
   }
 
-  // Need isStaff for moderation tab visibility
-  const { isStaff } = useAuth();
-
   const filteredTabs = tabConfig.filter(t => {
     if (t.id === 'moderation') return isStaff;
     return true;
   });
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case 'matches': return <MatchesTab />;
-      case 'create': return <CreateMatchTab />;
-      case 'tournaments': return <TournamentsTab />;
-      case 'moderation': return <ModerationTab />;
-      case 'profile': return <ProfileTab />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
       <ToastProvider>
         <main className="flex-1 overflow-hidden">
-          {renderTab()}
+          {/* Вкладки не размаунтируются при переключении (hidden вместо unmount) —
+              данные и live-подписки продолжают жить в фоне, нет мигания лоадера. */}
+          <div className={activeTab === 'matches' ? 'h-full' : 'hidden'}>
+            <MatchesTab onNavigate={(tab) => setActiveTab(tab as Tab)} />
+          </div>
+          <div className={activeTab === 'create' ? 'h-full' : 'hidden'}>
+            <CreateMatchTab />
+          </div>
+          <div className={activeTab === 'tournaments' ? 'h-full' : 'hidden'}>
+            <TournamentsTab />
+          </div>
+          {isStaff && (
+            <div className={activeTab === 'moderation' ? 'h-full' : 'hidden'}>
+              <ModerationTab />
+            </div>
+          )}
+          <div className={activeTab === 'profile' ? 'h-full' : 'hidden'}>
+            <ProfileTab />
+          </div>
         </main>
         
-        <nav className="fixed bottom-0 left-0 right-0 bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-area-bottom z-50" role="navigation" aria-label="Основная навигация">
-          <div className="grid grid-cols-5 gap-1 px-2 py-2">
+        <nav className="fixed bottom-0 left-0 right-0 bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-bottom z-50" role="navigation" aria-label="Основная навигация">
+          <div className="flex gap-1 px-2 py-2" role="tablist" aria-label="Разделы приложения">
             {filteredTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200
+                className={`flex flex-1 flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200
                   ${activeTab === tab.id 
-                    ? 'bg-[var(--color-brand-light)] text-[var(--color-brand)]' 
-                    : 'text-gray-400 active:text-gray-600'}`}
-                aria-current={activeTab === tab.id ? 'page' : undefined}
+                    ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-lg' 
+                    : 'text-[var(--color-text-tertiary)]'}`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
               >
                 <span className="text-2xl" aria-hidden="true">{tab.icon}</span>
                 <span className="text-xs font-medium">{tab.label}</span>

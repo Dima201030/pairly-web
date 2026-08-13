@@ -1,14 +1,27 @@
+'use client';
+
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc, where, Timestamp } from 'firebase/firestore';
 import { UserProfile, UserRole, Tournament, SavedVenue, Match } from '@/lib/types';
+import { roleNames } from '@/lib/theme';
 import { useEffect, useState } from 'react';
+
+export type ModerationSection = 'tournaments' | 'matches' | 'users' | 'venues' | 'support';
+
+const MODERATION_SECTIONS = [
+  { id: 'tournaments', label: 'Турниры', icon: '🏆' },
+  { id: 'matches', label: 'Матчи', icon: '🏟️' },
+  { id: 'users', label: 'Пользователи', icon: '👥' },
+  { id: 'venues', label: 'Клубы', icon: '🏟️' },
+  { id: 'support', label: 'Поддержка', icon: '🎧' },
+] as const;
 
 export function ModerationTab() {
   const { profile, isStaff, isModerator, isHost } = useAuth();
   const { showToast } = useToast();
-  const [activeSection, setActiveSection] = useState<'tournaments' | 'matches' | 'users' | 'venues' | 'support'>('tournaments');
+  const [activeSection, setActiveSection] = useState<ModerationSection>('tournaments');
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -22,6 +35,7 @@ export function ModerationTab() {
   const [geocoding, setGeocoding] = useState(false);
   const [venueCoords, setVenueCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [manualCoords, setManualCoords] = useState({ lat: '', lng: '' });
+  const [userQuery, setUserQuery] = useState('');
 
   useEffect(() => {
     if (!profile) return;
@@ -72,7 +86,7 @@ export function ModerationTab() {
 
   if (!isStaff) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 text-center text-gray-500 px-4">
+      <div className="flex-1 flex items-center justify-center pb-24 text-center text-[var(--color-text-secondary)] px-4">
         <div className="text-4xl mb-3">🛡️</div>
         <p className="text-lg font-medium">Доступно только модераторам</p>
       </div>
@@ -80,25 +94,41 @@ export function ModerationTab() {
   }
 
   const toggleBlock = async (uid: string, blocked: boolean) => {
-    await updateDoc(doc(db, 'users', uid), { blocked: !blocked });
-    showToast(blocked ? 'Разблокирован' : 'Заблокирован', 'success');
+    try {
+      await updateDoc(doc(db, 'users', uid), { blocked: !blocked });
+      showToast(blocked ? 'Пользователь разблокирован' : 'Пользователь заблокирован', 'success');
+    } catch {
+      showToast('Ошибка при изменении статуса', 'error');
+    }
   };
 
   const changeRole = async (uid: string, role: UserRole) => {
-    await updateDoc(doc(db, 'users', uid), { role });
-    showToast('Роль изменена', 'success');
+    try {
+      await updateDoc(doc(db, 'users', uid), { role });
+      showToast('Роль изменена', 'success');
+    } catch {
+      showToast('Ошибка при изменении роли', 'error');
+    }
   };
 
   const deleteVenue = async (venueId: string) => {
     if (!confirm('Удалить это место?')) return;
-    await deleteDoc(doc(db, 'venues', venueId));
-    showToast('Место удалено', 'success');
+    try {
+      await deleteDoc(doc(db, 'venues', venueId));
+      showToast('Место удалено', 'success');
+    } catch {
+      showToast('Ошибка при удалении', 'error');
+    }
   };
 
   const deleteMatch = async (matchId: string) => {
     if (!confirm('Удалить этот матч?')) return;
-    await deleteDoc(doc(db, 'matches', matchId));
-    showToast('Матч удалён', 'success');
+    try {
+      await deleteDoc(doc(db, 'matches', matchId));
+      showToast('Матч удалён', 'success');
+    } catch {
+      showToast('Ошибка при удалении', 'error');
+    }
   };
 
   const geocodeAddress = async () => {
@@ -149,41 +179,52 @@ export function ModerationTab() {
   };
 
   const roleColors: Record<string, string> = {
-    user: 'bg-gray-100 text-gray-600',
+    user: 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]',
     moderator: 'bg-[var(--color-brand)] text-white',
-    support: 'bg-green-100 text-green-700',
-    host: 'bg-yellow-100 text-yellow-700',
+    support: 'bg-[var(--color-green)]/15 text-[var(--color-green-light)]',
+    host: 'bg-[var(--color-yellow)]/15 text-[var(--color-yellow-light)]',
   };
 
-  const roleNames: Record<string, string> = {
-    user: 'Игрок',
-    moderator: 'Модератор',
-    support: 'Поддержка',
-    host: 'Хозяин',
+  const visibleUsers = users.filter(user => {
+    const q = userQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      user.displayName.toLowerCase().includes(q) ||
+      (user.email || '').toLowerCase().includes(q)
+    );
+  });
+
+  const onTablistKeyDown = (e: React.KeyboardEvent) => {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    e.preventDefault();
+    const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+    const ids = MODERATION_SECTIONS.map(s => s.id);
+    const current = ids.indexOf(activeSection);
+    setActiveSection(ids[(current + dir + ids.length) % ids.length]);
   };
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Модерация</h1>
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${isHost ? 'bg-yellow-100 text-yellow-700' : 'bg-[var(--color-brand)] text-white'}`}>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Модерация</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Управление турнирами, игроками и клубами</p>
+        </div>
+        <span className={`badge ${isHost ? 'badge-yellow' : 'bg-[var(--color-brand)]/15 text-[var(--color-brand)]'}`}>
           {isHost ? 'Хозяин' : 'Модератор'}
         </span>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2" role="tablist">
-        {[
-          { id: 'tournaments', label: 'Турниры', icon: '🏆' },
-          { id: 'matches', label: 'Матчи', icon: '🏟️' },
-          { id: 'users', label: 'Пользователи', icon: '👥' },
-          { id: 'venues', label: 'Клубы', icon: '🏟️' },
-          { id: 'support', label: 'Поддержка', icon: '🎧' },
-        ].map(s => (
+      <div className="flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Разделы модерации" onKeyDown={onTablistKeyDown}>
+        {MODERATION_SECTIONS.map(s => (
           <button
             key={s.id}
-            onClick={() => setActiveSection(s.id as any)}
-            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-colors ${
-              activeSection === s.id ? 'bg-[var(--color-brand)] text-white' : 'bg-white text-gray-600 border border-gray-200'
+            id={`mod-tab-${s.id}`}
+            onClick={() => setActiveSection(s.id)}
+            aria-controls="mod-panel"
+            tabIndex={activeSection === s.id ? 0 : -1}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+              activeSection === s.id ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-md' : 'bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border)]'
             }`}
             role="tab"
             aria-selected={activeSection === s.id}
@@ -193,22 +234,37 @@ export function ModerationTab() {
         ))}
       </div>
 
+      <div id="mod-panel" role="tabpanel" aria-labelledby={`mod-tab-${activeSection}`} className="space-y-4">
+
       {activeSection === 'users' && !usersLoading && (
         <div className="space-y-3">
-          {users.map(user => (
+          <input
+            type="search"
+            placeholder="Поиск по имени или email..."
+            value={userQuery}
+            onChange={e => setUserQuery(e.target.value)}
+            aria-label="Поиск пользователей"
+            className="input-field"
+          />
+          {visibleUsers.length === 0 ? (
+            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
+              <p className="font-medium">Никого не найдено</p>
+            </div>
+          ) : (
+          visibleUsers.map(user => (
             <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
                   {user.displayName[0].toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{user.displayName}</p>
-                  <p className="text-sm text-gray-500 truncate">{user.email || 'email не указан'}</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]'}`}>
                       {roleNames[user.role] || user.role}
                     </span>
-                    {user.blocked && <span className="text-xs text-red-600 font-medium">🚫 Заблокирован</span>}
+                    {user.blocked && <span className="text-xs text-[var(--color-red-light)] font-medium">🚫 Заблокирован</span>}
                   </div>
                 </div>
               </div>
@@ -217,7 +273,7 @@ export function ModerationTab() {
                   value={user.role}
                   onChange={e => changeRole(user.uid, e.target.value as UserRole)}
                   disabled={user.role === 'host' && !isHost}
-                  className="px-2 py-1 text-sm border border-gray-200 rounded-lg bg-white"
+                  className="px-2 py-1 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)]"
                 >
                   <option value="user">Игрок</option>
                   <option value="moderator">Модератор</option>
@@ -226,13 +282,14 @@ export function ModerationTab() {
                 </select>
                 <button
                   onClick={() => toggleBlock(user.uid, user.blocked)}
-                  className={`px-3 py-1.5 text-sm rounded-lg font-medium ${user.blocked ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+                  className={`px-3 py-1.5 text-sm rounded-lg font-medium ${user.blocked ? 'bg-[var(--color-green)]/15 text-[var(--color-green-light)]' : 'bg-[var(--color-red)]/15 text-[var(--color-red-light)]'}`}
                 >
                   {user.blocked ? 'Разблокировать' : 'Заблокировать'}
                 </button>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       )}
 
@@ -245,9 +302,9 @@ export function ModerationTab() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold">{t.title}</h3>
-                  <p className="text-sm text-gray-500">{t.venue}, {t.city}</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">{t.venue}, {t.city}</p>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${t.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                <span className={`badge ${t.status === 'open' ? 'badge-green' : t.status === 'finished' ? 'badge-gray' : 'badge-red'}`}>
                   {t.status === 'open' ? 'Открыт' : t.status === 'finished' ? 'Завершён' : 'Отменён'}
                 </span>
               </div>
@@ -261,7 +318,7 @@ export function ModerationTab() {
           {matchesLoading ? (
             <div className="flex items-center justify-center py-8">Загрузка...</div>
           ) : matches.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
               <p className="font-medium">Матчей пока нет</p>
             </div>
           ) : (
@@ -270,18 +327,18 @@ export function ModerationTab() {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold truncate">{m.venue}</p>
-                    <p className="text-sm text-gray-500">{m.city}{m.district ? ` · ${m.district}` : ''}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-sm text-[var(--color-text-tertiary)]">{m.city}{m.district ? ` · ${m.district}` : ''}</p>
+                    <p className="text-xs text-[var(--color-text-tertiary)]/70 mt-0.5">
                       {new Date(m.startDate).toLocaleString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · {m.sport} · {m.level}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${m.openSpots > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`badge ${m.openSpots > 0 ? 'badge-green' : 'badge-gray'}`}>
                       {m.openSpots > 0 ? `${m.openSpots} мест` : 'Мест нет'}
                     </span>
                     <button
                       onClick={() => deleteMatch(m.id)}
-                      className="px-3 py-1.5 text-sm rounded-lg bg-red-100 text-red-700 font-medium flex-shrink-0"
+                      className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
                     >
                       Удалить
                     </button>
@@ -296,7 +353,7 @@ export function ModerationTab() {
       {activeSection === 'venues' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">{venues.length} мест</p>
+            <p className="text-sm text-[var(--color-text-tertiary)]">{venues.length} мест</p>
             <button
               onClick={() => {
                 setShowAddVenue(false);
@@ -304,7 +361,7 @@ export function ModerationTab() {
                 setVenueCoords(null);
                 setManualCoords({ lat: '', lng: '' });
               }}
-              className="px-4 py-2 rounded-xl bg-[var(--color-brand)] text-white text-sm font-semibold"
+              className="btn btn-brand-gradient btn-sm"
             >
               {showAddVenue ? 'Отмена' : '+ Добавить'}
             </button>
@@ -337,13 +394,13 @@ export function ModerationTab() {
               <button
                 onClick={geocodeAddress}
                 disabled={!newVenue.name.trim() || geocoding}
-                className="w-full px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium disabled:opacity-50"
+                className="w-full px-4 py-2 rounded-xl bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] text-sm font-medium hover:bg-[var(--color-surface-hover)] disabled:opacity-50"
               >
                 {geocoding ? 'Определяем координаты...' : '📍 Определить координаты по адресу'}
               </button>
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-divider)]">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Широта (lat)</label>
+                  <label className="block text-xs text-[var(--color-text-tertiary)] mb-1">Широта (lat)</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -354,7 +411,7 @@ export function ModerationTab() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Долгота (lng)</label>
+                  <label className="block text-xs text-[var(--color-text-tertiary)] mb-1">Долгота (lng)</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -373,21 +430,22 @@ export function ModerationTab() {
                     setVenueCoords({ lat, lng });
                   }
                 }}
-                className="w-full px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200"
+                className="w-full px-4 py-2 rounded-xl bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] text-sm font-medium hover:bg-[var(--color-surface-hover)]"
                 disabled={!manualCoords.lat || !manualCoords.lng}
               >
                 Использовать введённые координаты
               </button>
               {venueCoords && (
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-[var(--color-text-secondary)]">
                   Координаты: {venueCoords.lat.toFixed(5)}, {venueCoords.lng.toFixed(5)}
-                  <div className="mt-2 rounded-xl overflow-hidden border border-gray-200">
+                  <div className="mt-2 rounded-xl overflow-hidden border border-[var(--color-border)]">
                     <iframe
                       width="100%"
                       height="200"
                       style={{ border: 0 }}
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
+                      title={`Карта: ${newVenue.name}`}
                       src={`https://www.openstreetmap.org/export/embed.html?bbox=${venueCoords.lng - 0.01}%2C${venueCoords.lat - 0.005}%2C${venueCoords.lng + 0.01}%2C${venueCoords.lat + 0.005}&layer=mapnik&marker=${venueCoords.lat}%2C${venueCoords.lng}`}
                     />
                   </div>
@@ -396,7 +454,7 @@ export function ModerationTab() {
               <button
                 onClick={saveVenue}
                 disabled={!venueCoords || !newVenue.name.trim()}
-                className="w-full px-4 py-3 rounded-xl bg-[var(--color-brand)] text-white font-semibold disabled:opacity-50"
+                className="btn btn-brand-gradient btn-full"
               >
                 Сохранить
               </button>
@@ -406,7 +464,7 @@ export function ModerationTab() {
           {venuesLoading ? (
             <div className="flex items-center justify-center py-8">Загрузка...</div>
           ) : venues.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
               <p className="font-medium">Мест пока нет</p>
               <p className="text-sm mt-1">Добавьте первое место для игры</p>
             </div>
@@ -415,16 +473,16 @@ export function ModerationTab() {
               <div key={v.id} className="card p-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{v.name}</p>
-                  <p className="text-sm text-gray-500">{v.city}{v.district ? ` · ${v.district}` : ''}</p>
+                  <p className="text-sm text-[var(--color-text-tertiary)]">{v.city}{v.district ? ` · ${v.district}` : ''}</p>
                   {(v.latitude !== 0 || v.longitude !== 0) && (
-                    <p className="text-xs text-gray-400 mt-0.5 font-mono">
+                    <p className="text-xs text-[var(--color-text-tertiary)]/70 mt-0.5 font-mono">
                       {v.latitude?.toFixed(5)}, {v.longitude?.toFixed(5)}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={() => deleteVenue(v.id)}
-                  className="px-3 py-1.5 text-sm rounded-lg bg-red-100 text-red-700 font-medium flex-shrink-0"
+                  className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
                 >
                   Удалить
                 </button>
@@ -433,6 +491,42 @@ export function ModerationTab() {
           )}
         </div>
       )}
+
+      {activeSection === 'support' && (
+        <div className="space-y-3">
+          <p className="text-sm text-[var(--color-text-tertiary)]">
+            Агенты поддержки — пользователи с ролью «Поддержка». Обращения обрабатываются в приложении, здесь можно управлять составом команды.
+          </p>
+          {users.filter(u => u.role === 'support').length === 0 ? (
+            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
+              <p className="font-medium">Агентов поддержки пока нет</p>
+              <p className="text-sm mt-1">Назначьте роль «Поддержка» во вкладке «Пользователи»</p>
+            </div>
+          ) : (
+            users.filter(u => u.role === 'support').map(user => (
+              <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
+                    {user.displayName[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{user.displayName}</p>
+                    <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
+                    {user.blocked && <p className="text-xs text-[var(--color-red-light)] font-medium mt-1">🚫 Заблокирован</p>}
+                  </div>
+                </div>
+                <button
+                  onClick={() => changeRole(user.uid, 'user')}
+                  className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
+                >
+                  Снять роль
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 interface Toast {
   id: string;
@@ -17,25 +17,31 @@ const ToastContext = createContext<ToastContextType | null>(null);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = (message: string, type: Toast['type'] = 'info') => {
+  const showToast = useCallback((message: string, type: Toast['type'] = 'info') => {
     const id = Math.random().toString(36).slice(2);
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
-  };
+  }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div
+        className="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
+        role="status"
+        aria-live="polite"
+      >
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className={`pointer-events-auto px-4 py-3 rounded-xl shadow-lg animate-slide-up ${
-              toast.type === 'error' ? 'bg-red-500 text-white' :
-              toast.type === 'success' ? 'bg-green-500 text-white' :
-              'bg-gray-900 text-white'
+            className={`pointer-events-auto px-4 py-3 rounded-xl shadow-[var(--shadow-lg)] border animate-slide-up ${
+              toast.type === 'error'
+                ? 'bg-[var(--color-red)] text-[var(--color-text-inverse)] border-transparent'
+                : toast.type === 'success'
+                  ? 'bg-[var(--color-green)] text-[var(--color-text-inverse)] border-transparent'
+                  : 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-primary)] border-[var(--color-border)]'
             }`}
           >
             {toast.message}

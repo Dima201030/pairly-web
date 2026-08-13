@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pairly Web
 
-## Getting Started
+Web-версия Pairly (Next.js App Router). Планировщик матчей и турниров: заявки на игры, чаты участников, модерация.
 
-First, run the development server:
+## Разработка
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # http://localhost:3000
+npm run build   # продакшн-сборка
+npm run lint    # eslint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Аутентификация и профиль (важно)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Firestore-правила (`firestore.rules` в проекте iOS) запрещают **создавать** профиль
+в `users/{uid}`, если в документе есть поле `role` (защита от само-эскалации роли):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+allow create: if isSignedIn() && request.auth.uid == userId && !('role' in request.resource.data)
+```
 
-## Learn More
+Поэтому `src/lib/AuthContext.tsx`:
+- `register` и `updateProfile` никогда не отправляют в док `role`/`blocked` — эти поля
+  серверно-контролируемые (назначаются только через модерацию).
+- Если док так и не создался (аккаунты до фикса), `createMissingProfile` при входе
+  самовосстанавливает минимальный профиль БЕЗ `role`.
+- Локально `setProfile` отражает `role` сразу, чтобы UI видел права до записи в БД.
 
-To learn more about Next.js, take a look at the following resources:
+Роли в приложении: `user`, `moderator`, `support`, `host`. Меняются только через
+`ModerationTab` (прямой `updateDoc`), не через профиль пользователя.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Брендовые цвета (синий + зелёный)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Дизайн-токены в `src/app/globals.css`:
 
-## Deploy on Vercel
+- `--color-brand*` — **синий** `#0096FF`, основной цвет действий (кнопки, активное, фокус).
+- `--color-brand-green*` — **зелёный** `#00D4AA`, акцент (вторичные кнопки, «открыто», positive).
+- `brand-gradient` / `brand-gradient-text` — сине-зелёный градиент для брендовых моментов
+  (логотип, активные табы, подсветка).
+- `pill-active`, `.btn-brand-gradient`, `.btn-primary` (синий), `.btn-secondary` (зелёный).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Структура
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/page.tsx` — лента с табами; вкладки не размаунтятся (hidden), live-подписки живут.
+- `src/app/login/page.tsx` — вход/регистрация.
+- `src/components/tabs/` — Матчи, Заявка, Турниры, Модерация, Профиль.
+- `src/lib/AuthContext.tsx` — Firebase Auth + подписка на профиль + join-транзакции.
+- `src/lib/firebase.ts` — конфиг Firebase (env с фолбэками).
