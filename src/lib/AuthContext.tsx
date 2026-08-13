@@ -20,6 +20,7 @@ interface AuthContextType {
   register: (email: string, password: string, displayName: string, sport?: string) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
+  restoreProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -181,6 +182,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(updated);
   }, [user, profile]);
 
+  // Ручное восстановление профиля (кнопка на вкладке «Профиль»): повторно
+  // создаёт док, если он так и не появился (старые аккаунты без профиля).
+  const restoreProfile = useCallback(async () => {
+    if (!user) return;
+    await createMissingProfile(user);
+  }, [user, createMissingProfile]);
+
   const isHost = profile?.role === 'host';
   const isModerator = profile?.role === 'moderator' || profile?.role === 'host';
   const isSupport = profile?.role === 'support';
@@ -199,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
       updateProfile,
+      restoreProfile,
     }}>
       {children}
     </AuthContext.Provider>

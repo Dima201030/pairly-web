@@ -45,11 +45,14 @@ export default function LoginPage() {
       }
     } catch (err) {
       const e = err as { code?: string; message?: string };
-      const msg = e.code === 'auth/user-not-found' ? 'Пользователь не найден' :
-                  e.code === 'auth/wrong-password' ? 'Неверный пароль' :
+      const msg = e.code === 'auth/user-not-found' ? 'Пользователь не найден (проверьте email)' :
+                  e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' ? 'Неверный пароль' :
+                  e.code === 'auth/invalid-email' ? 'Некорректный email' :
+                  e.code === 'auth/too-many-requests' ? 'Слишком много попыток, подождите 1 минуту' :
+                  e.code === 'auth/network-request-failed' ? 'Нет сети — проверьте подключение' :
                   e.code === 'auth/email-already-in-use' ? 'Email уже зарегистрирован' :
                   e.code === 'auth/weak-password' ? 'Пароль минимум 6 символов' :
-                  e.message || 'Неизвестная ошибка';
+                  (e.message || 'Неизвестная ошибка') + (e.code ? ` (${e.code})` : '');
       setError(msg);
     } finally {
       setLoading(false);
@@ -57,7 +60,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--color-surface-secondary)]">
+      <div className="relative mx-auto w-full max-w-3xl min-h-screen bg-[var(--color-bg)] border-x border-[var(--color-border)] shadow-[0_0_60px_-15px_rgba(0,150,255,0.15)] flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Брендовое свечение */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl brand-gradient" aria-hidden="true" />
 
@@ -166,6 +170,7 @@ export default function LoginPage() {
           </button>
         </p>
         </div>
+      </div>
       </div>
     </div>
   );

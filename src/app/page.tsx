@@ -49,50 +49,52 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
-      <ToastProvider>
-        <main className="flex-1 overflow-hidden">
-          {/* Вкладки не размаунтируются при переключении (hidden вместо unmount) —
-              данные и live-подписки продолжают жить в фоне, нет мигания лоадера. */}
-          <div className={activeTab === 'matches' ? 'h-full' : 'hidden'}>
-            <MatchesTab onNavigate={(tab) => setActiveTab(tab as Tab)} />
-          </div>
-          <div className={activeTab === 'create' ? 'h-full' : 'hidden'}>
-            <CreateMatchTab />
-          </div>
-          <div className={activeTab === 'tournaments' ? 'h-full' : 'hidden'}>
-            <TournamentsTab />
-          </div>
-          {isStaff && (
-            <div className={activeTab === 'moderation' ? 'h-full' : 'hidden'}>
-              <ModerationTab />
+    <div className="min-h-screen bg-[var(--color-surface-secondary)]">
+      <div className="mx-auto w-full max-w-3xl min-h-screen bg-[var(--color-bg)] border-x border-[var(--color-border)] shadow-[0_0_60px_-15px_rgba(0,150,255,0.15)] flex flex-col">
+        <ToastProvider>
+          <main className="flex-1 overflow-hidden">
+            {/* Вкладки не размаунтируются при переключении (hidden вместо unmount) —
+                данные и live-подписки продолжают жить в фоне, нет мигания лоадера. */}
+            <div className={activeTab === 'matches' ? 'h-full' : 'hidden'}>
+              <MatchesTab onNavigate={(tab) => setActiveTab(tab as Tab)} />
             </div>
-          )}
-          <div className={activeTab === 'profile' ? 'h-full' : 'hidden'}>
-            <ProfileTab />
-          </div>
-        </main>
-        
-        <nav className="fixed bottom-0 left-0 right-0 bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-bottom z-50" role="navigation" aria-label="Основная навигация">
-          <div className="flex gap-1 px-2 py-2" role="tablist" aria-label="Разделы приложения">
-            {filteredTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-1 flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200
-                  ${activeTab === tab.id 
-                    ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-lg' 
-                    : 'text-[var(--color-text-tertiary)]'}`}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-              >
-                <span className="text-2xl" aria-hidden="true">{tab.icon}</span>
-                <span className="text-xs font-medium">{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
-      </ToastProvider>
+            <div className={activeTab === 'create' ? 'h-full' : 'hidden'}>
+              <CreateMatchTab />
+            </div>
+            <div className={activeTab === 'tournaments' ? 'h-full' : 'hidden'}>
+              <TournamentsTab />
+            </div>
+            {isStaff && (
+              <div className={activeTab === 'moderation' ? 'h-full' : 'hidden'}>
+                <ModerationTab />
+              </div>
+            )}
+            <div className={activeTab === 'profile' ? 'h-full' : 'hidden'}>
+              <ProfileTab />
+            </div>
+          </main>
+
+          <nav className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-3xl bg-[var(--color-surface)] border-t border-x border-[var(--color-border)] safe-bottom z-50" role="navigation" aria-label="Основная навигация">
+            <div className="flex gap-1 px-2 py-2" role="tablist" aria-label="Разделы приложения">
+              {filteredTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-1 flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200
+                    ${activeTab === tab.id 
+                      ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-lg' 
+                      : 'text-[var(--color-text-tertiary)]'}`}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                >
+                  <span className="text-2xl" aria-hidden="true">{tab.icon}</span>
+                  <span className="text-xs font-medium">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+          </nav>
+        </ToastProvider>
+      </div>
     </div>
   );
 }

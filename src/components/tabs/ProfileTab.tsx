@@ -10,12 +10,13 @@ import { useEffect, useState } from 'react';
 import { sportNames, levelNames, roleNames, sportIcons, sportColors } from '@/lib/theme';
 
 export function ProfileTab() {
-  const { profile, user, logout, updateProfile } = useAuth();
+  const { profile, user, logout, updateProfile, restoreProfile } = useAuth();
   const { showToast } = useToast();
   const [myMatches, setMyMatches] = useState<Match[]>([]);
   const [myTournaments, setMyTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [editForm, setEditForm] = useState({
     displayName: '',
     city: '',
@@ -96,13 +97,26 @@ export function ProfileTab() {
 
   if (!profile) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 px-4">
+      <div className="flex-1 flex flex-col items-center justify-center pb-24 px-4">
         <div className="text-center animate-in">
           <div className="text-5xl mb-3">👤</div>
           <p className="text-lg font-medium text-[var(--color-text-secondary)]">Профиль не найден</p>
-          <p className="text-sm text-[var(--color-text-tertiary)] mt-1">
-            Попробуйте перезайти в аккаунт или обновить страницу.
+          <p className="text-sm text-[var(--color-text-tertiary)] mt-1 max-w-xs">
+            Аккаунт создан, но документ профиля в базе ещё не появился. Нажмите кнопку ниже,
+            чтобы создать его автоматически.
           </p>
+          <button
+            onClick={async () => {
+              setRestoring(true);
+              await restoreProfile();
+              setRestoring(false);
+              showToast('Профиль восстановлен', 'success');
+            }}
+            disabled={restoring}
+            className="btn btn-brand-gradient press-scale mt-6"
+          >
+            {restoring ? 'Восстанавливаем...' : 'Восстановить профиль'}
+          </button>
         </div>
       </div>
     );
