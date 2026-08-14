@@ -76,3 +76,40 @@ export interface SavedVenue {
   latitude: number;
   longitude: number;
 }
+
+export interface ChatMessage {
+  id: string;
+  matchID: string;
+  authorID: string;
+  authorName: string;
+  text: string;
+  sentAt: Date;
+}
+
+export type SupportChatStatus = 'waiting' | 'assigned' | 'inProgress' | 'resolved' | 'closed';
+
+export interface SupportChat {
+  id: string;
+  userID: string;
+  userName: string;
+  userCity: string;
+  assignedStaffID?: string;
+  assignedStaffName?: string;
+  status: SupportChatStatus;
+  lastMessage?: string;
+  lastMessageDate?: Date;
+  unreadCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface SupportMessage {
+  id: string;
+  chatID: string;
+  authorID: string;
+  authorName: string;
+  authorRole: string;
+  text: string;
+  sentAt: Date;
+  read: boolean;
+}

@@ -8,6 +8,7 @@ import { Match, Tournament, Sport, SkillLevel } from '@/lib/types';
 import { formatDate } from '@/lib/format';
 import { useEffect, useState } from 'react';
 import { sportNames, levelNames, roleNames, sportIcons, sportColors } from '@/lib/theme';
+import { SupportChatPanel } from '@/components/panels/SupportChatPanel';
 
 export function ProfileTab() {
   const { profile, user, logout, updateProfile, restoreProfile } = useAuth();
@@ -17,6 +18,7 @@ export function ProfileTab() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [editForm, setEditForm] = useState({
     displayName: '',
     city: '',
@@ -89,7 +91,7 @@ export function ProfileTab() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24">
+      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10">
         <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка...</div>
       </div>
     );
@@ -97,7 +99,7 @@ export function ProfileTab() {
 
   if (!profile) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center pb-24 px-4">
+      <div className="flex-1 flex flex-col items-center justify-center pb-24 md:pb-10 px-4">
         <div className="text-center animate-in">
           <div className="text-5xl mb-3">👤</div>
           <p className="text-lg font-medium text-[var(--color-text-secondary)]">Профиль не найден</p>
@@ -123,7 +125,7 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 px-4 pt-4 space-y-5 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in">
       <div className="card p-5 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
         <div className="flex items-center gap-4">
@@ -255,7 +257,13 @@ export function ProfileTab() {
         emptyMessage="Турниров пока нет"
       />
 
-      <div className="card p-4">
+      <div className="card p-4 space-y-2">
+        <button
+          onClick={() => setShowSupport(true)}
+          className="btn btn-outline btn-full"
+        >
+          🎧 Связаться с поддержкой
+        </button>
         <button
           onClick={() => logout()}
           className="btn btn-danger btn-full"
@@ -263,6 +271,10 @@ export function ProfileTab() {
           Выйти из аккаунта
         </button>
       </div>
+
+      {showSupport && (
+        <SupportChatPanel mode="user" onClose={() => setShowSupport(false)} />
+      )}
     </div>
   );
 }

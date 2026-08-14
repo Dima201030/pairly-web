@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { Sport } from '@/lib/types';
@@ -60,14 +61,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface-secondary)]">
+    <div className="min-h-screen pairly-bg">
       <div className="relative mx-auto w-full max-w-3xl min-h-screen bg-[var(--color-bg)] border-x border-[var(--color-border)] shadow-[0_0_60px_-15px_rgba(0,150,255,0.15)] flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Брендовое свечение */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl brand-gradient" aria-hidden="true" />
 
       <div className="w-full max-w-md relative">
         <div className="text-center mb-8">
-          <h1 className="brand-gradient-text text-5xl font-extrabold tracking-tight">Pairly</h1>
+          <Image
+            src="/logo-white.png"
+            alt="Pairly"
+            width={1024}
+            height={1024}
+            className="h-20 w-auto mx-auto mb-3"
+          />
           <p className="mt-2 text-[var(--color-text-secondary)]">Находи игры, организуй матчи, играй вместе</p>
         </div>
 

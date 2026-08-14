@@ -8,6 +8,7 @@ import { collection, query, orderBy, onSnapshot, Timestamp, addDoc, limit, doc, 
 import { db } from '@/lib/firebase';
 import { useEffect, useState, useRef } from 'react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { TournamentDetailPanel } from '@/components/panels/TournamentDetailPanel';
 
 const DEFAULT_START = Date.now() + 7 * 24 * 60 * 60 * 1000;
 const DEFAULT_DEADLINE = Date.now() + 6 * 24 * 60 * 60 * 1000;
@@ -19,6 +20,7 @@ export function TournamentsTab() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [joiningId, setJoiningId] = useState<string | null>(null);
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const createBtnRef = useRef<HTMLButtonElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const [form, setForm] = useState({
@@ -187,7 +189,7 @@ export function TournamentsTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Турниры</h1>
@@ -315,7 +317,7 @@ export function TournamentsTab() {
               ? Math.max(0, Math.min(100, Math.round((t.participants.length / t.maxParticipants) * 100)))
               : 0;
             return (
-            <article key={t.id} className={`card p-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : ''}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem">
+            <article key={t.id} className={`card p-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : 'card-interactive'}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem" onClick={() => setSelectedTournament(t)}>
               <div className="flex gap-4">
                 <div className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border"
                   style={{
@@ -377,7 +379,7 @@ export function TournamentsTab() {
               <div className="flex justify-end mt-3 border-t border-[var(--color-divider)] pt-3">
                 {isJoined ? (
                   <button
-                    onClick={() => joinTournament(t, true)}
+                    onClick={(e) => { e.stopPropagation(); joinTournament(t, true); }}
                     disabled={joiningId === t.id}
                     className="btn btn-outline btn-sm"
                   >
@@ -385,7 +387,7 @@ export function TournamentsTab() {
                   </button>
                 ) : t.status === 'open' && t.participants.length < t.maxParticipants ? (
                   <button
-                    onClick={() => joinTournament(t, false)}
+                    onClick={(e) => { e.stopPropagation(); joinTournament(t, false); }}
                     disabled={joiningId === t.id}
                     className="btn btn-primary btn-sm"
                   >
@@ -399,6 +401,14 @@ export function TournamentsTab() {
             );
           })}
         </div>
+      )}
+
+      {selectedTournament && (
+        <TournamentDetailPanel
+          tournamentId={selectedTournament.id}
+          initial={selectedTournament}
+          onClose={() => setSelectedTournament(null)}
+        />
       )}
     </div>
   );

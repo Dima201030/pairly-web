@@ -4,9 +4,10 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc, where, Timestamp } from 'firebase/firestore';
-import { UserProfile, UserRole, Tournament, SavedVenue, Match } from '@/lib/types';
-import { roleNames } from '@/lib/theme';
+import { UserProfile, UserRole, Tournament, SavedVenue, Match, SupportChat } from '@/lib/types';
+import { roleNames, supportStatusNames } from '@/lib/theme';
 import { useEffect, useState } from 'react';
+import { SupportChatPanel } from '@/components/panels/SupportChatPanel';
 
 export type ModerationSection = 'tournaments' | 'matches' | 'users' | 'venues' | 'support';
 
@@ -36,6 +37,9 @@ export function ModerationTab() {
   const [venueCoords, setVenueCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [manualCoords, setManualCoords] = useState({ lat: '', lng: '' });
   const [userQuery, setUserQuery] = useState('');
+  const [supportChats, setSupportChats] = useState<SupportChat[]>([]);
+  const [supportChatsLoading, setSupportChatsLoading] = useState(true);
+  const [openChat, setOpenChat] = useState<SupportChat | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -81,12 +85,31 @@ export function ModerationTab() {
       setMatchesLoading(false);
     });
 
-    return () => { usersUnsub(); tourneysUnsub(); venuesUnsub(); matchesUnsub(); };
+    const supportChatsQ = query(
+      collection(db, 'supportChats'),
+      orderBy('updatedAt', 'desc'),
+      limit(50)
+    );
+    const supportChatsUnsub = onSnapshot(supportChatsQ, (snap) => {
+      setSupportChats(snap.docs.map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt),
+          createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+          lastMessageDate: data.lastMessageDate?.toDate?.(),
+        } as SupportChat;
+      }));
+      setSupportChatsLoading(false);
+    });
+
+    return () => { usersUnsub(); tourneysUnsub(); venuesUnsub(); matchesUnsub(); supportChatsUnsub(); };
   }, [profile, isModerator, isHost]);
 
   if (!isStaff) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 text-center text-[var(--color-text-secondary)] px-4">
+      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10 text-center text-[var(--color-text-secondary)] px-4">
         <div className="text-4xl mb-3">🛡️</div>
         <p className="text-lg font-medium">Доступно только модераторам</p>
       </div>
@@ -204,7 +227,7 @@ export function ModerationTab() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Модерация</h1>
@@ -493,40 +516,98 @@ export function ModerationTab() {
       )}
 
       {activeSection === 'support' && (
-        <div className="space-y-3">
-          <p className="text-sm text-[var(--color-text-tertiary)]">
-            Агенты поддержки — пользователи с ролью «Поддержка». Обращения обрабатываются в приложении, здесь можно управлять составом команды.
-          </p>
-          {users.filter(u => u.role === 'support').length === 0 ? (
-            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
-              <p className="font-medium">Агентов поддержки пока нет</p>
-              <p className="text-sm mt-1">Назначьте роль «Поддержка» во вкладке «Пользователи»</p>
-            </div>
-          ) : (
-            users.filter(u => u.role === 'support').map(user => (
-              <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
-                    {user.displayName[0].toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold truncate">{user.displayName}</p>
-                    <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
-                    {user.blocked && <p className="text-xs text-[var(--color-red-light)] font-medium mt-1">🚫 Заблокирован</p>}
-                  </div>
-                </div>
-                <button
-                  onClick={() => changeRole(user.uid, 'user')}
-                  className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
-                >
-                  Снять роль
-                </button>
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+              Обращения
+            </h3>
+            {supportChatsLoading ? (
+              <div className="flex items-center justify-center py-8">Загрузка...</div>
+            ) : supportChats.length === 0 ? (
+              <div className="card p-6 text-center text-[var(--color-text-tertiary)]">
+                <p className="font-medium">Обращений пока нет</p>
               </div>
-            ))
-          )}
+            ) : (
+              <div className="space-y-3">
+                {supportChats.map(c => (
+                  <div key={c.id} className="card p-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold truncate">{c.userName}</p>
+                        {c.userCity && <span className="text-sm text-[var(--color-text-tertiary)]">· {c.userCity}</span>}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <span className={`badge shrink-0 ${c.status === 'closed' ? 'badge-gray' : c.status === 'waiting' ? 'badge-yellow' : 'badge-blue'}`}>
+                          {supportStatusNames[c.status] || c.status}
+                        </span>
+                        {c.assignedStaffName && (
+                          <span className="text-xs text-[var(--color-text-tertiary)]">Оператор: {c.assignedStaffName}</span>
+                        )}
+                      </div>
+                      {c.lastMessage && (
+                        <p className="text-sm text-[var(--color-text-tertiary)] truncate mt-1">{c.lastMessage}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setOpenChat(c)}
+                      className="btn btn-outline btn-sm shrink-0"
+                    >
+                      Открыть
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+              Агенты поддержки
+            </h3>
+            <p className="text-sm text-[var(--color-text-tertiary)] mb-3">
+              Пользователи с ролью «Поддержка». Обращения открываются выше.
+            </p>
+            {users.filter(u => u.role === 'support').length === 0 ? (
+              <div className="text-center py-6 text-[var(--color-text-tertiary)]">
+                <p className="font-medium">Агентов поддержки пока нет</p>
+                <p className="text-sm mt-1">Назначьте роль «Поддержка» во вкладке «Пользователи»</p>
+              </div>
+            ) : (
+              users.filter(u => u.role === 'support').map(user => (
+                <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
+                      {user.displayName[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{user.displayName}</p>
+                      <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
+                      {user.blocked && <p className="text-xs text-[var(--color-red-light)] font-medium mt-1">🚫 Заблокирован</p>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => changeRole(user.uid, 'user')}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
+                  >
+                    Снять роль
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
       </div>
+
+      {openChat && (
+        <SupportChatPanel
+          mode="staff"
+          chatId={openChat.id}
+          onClose={() => setOpenChat(null)}
+        />
+      )}
     </div>
   );
 }

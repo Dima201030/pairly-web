@@ -8,6 +8,7 @@ import { formatDate, timeUntil } from '@/lib/format';
 import { collection, query, where, orderBy, onSnapshot, Timestamp, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
 import { useEffect, useState } from 'react';
 
 export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
@@ -20,6 +21,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const [selectedLevel, setSelectedLevel] = useState<SkillLevel | null>(null);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [cities, setCities] = useState<string[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -142,7 +144,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const levels: SkillLevel[] = ['any', 'beginner', 'middle', 'advanced'];
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 pt-4 px-4 space-y-4 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 animate-in">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Матчи</h1>
@@ -210,9 +212,18 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
               joining={joiningId === match.id}
               onJoin={() => joinMatch(match, false)}
               onLeave={() => joinMatch(match, true)}
+              onOpen={() => setSelectedMatch(match)}
             />
           ))}
         </div>
+      )}
+
+      {selectedMatch && (
+        <MatchDetailPanel
+          matchId={selectedMatch.id}
+          initial={selectedMatch}
+          onClose={() => setSelectedMatch(null)}
+        />
       )}
     </div>
   );
@@ -259,9 +270,10 @@ interface MatchCardProps {
   joining: boolean;
   onJoin: () => void;
   onLeave: () => void;
+  onOpen: () => void;
 }
 
-function MatchCard({ match, profile, index, joining, onJoin, onLeave }: MatchCardProps) {
+function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: MatchCardProps) {
   const isJoined = match.participants.includes(profile?.uid || '');
   const sportColor = sportColors[match.sport];
   const hasMap = match.latitude !== 0 || match.longitude !== 0;
@@ -274,6 +286,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave }: MatchCar
       className={`card p-4 flex flex-col gap-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : 'card-interactive'}`}
       style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
       role="listitem"
+      onClick={onOpen}
     >
       <div className="flex gap-4">
         <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border"
@@ -355,7 +368,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave }: MatchCar
 
         {isJoined ? (
           <button
-            onClick={onLeave}
+            onClick={(e) => { e.stopPropagation(); onLeave(); }}
             disabled={joining}
             className="btn btn-outline btn-sm shrink-0"
           >
@@ -363,7 +376,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave }: MatchCar
           </button>
         ) : (
           <button
-            onClick={onJoin}
+            onClick={(e) => { e.stopPropagation(); onJoin(); }}
             disabled={joining || match.openSpots === 0}
             className={`btn btn-sm shrink-0 ${match.openSpots > 0 ? 'btn-primary' : 'btn-outline'}`}
           >

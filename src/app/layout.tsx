@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 export const metadata: Metadata = {
   title: 'Pairly — Найди игру',
   description: 'Приложение для поиска партнеров по падлу, теннису и другим видам спорта',
+  icons: {
+    icon: '/logo-mark.png',
+  },
 };
 
 export default function RootLayout({

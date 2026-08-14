@@ -44,3 +44,11 @@ export const tournamentStatusNames: Record<string, string> = {
   finished: 'Завершён',
   cancelled: 'Отменён',
 };
+
+export const supportStatusNames: Record<string, string> = {
+  waiting: 'Ожидает',
+  assigned: 'Назначен',
+  inProgress: 'В работе',
+  resolved: 'Решён',
+  closed: 'Закрыт',
+};

@@ -380,6 +380,18 @@
 }
 
 @layer utilities {
+  .pairly-bg {
+    background-color: var(--color-surface-secondary);
+    background-image:
+      radial-gradient(720px 520px at 6% 12%, rgba(0, 150, 255, 0.10), transparent 60%),
+      radial-gradient(720px 520px at 94% 22%, rgba(0, 212, 170, 0.08), transparent 60%),
+      radial-gradient(900px 620px at 50% 108%, rgba(0, 150, 255, 0.07), transparent 62%),
+      radial-gradient(520px 420px at 95% 92%, rgba(0, 212, 170, 0.05), transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: auto, auto, auto, auto, 44px 44px, 44px 44px;
+  }
+
   .text-balance {
     text-wrap: balance;
   }
