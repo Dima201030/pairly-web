@@ -61,7 +61,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pairly-bg">
-      <div className="relative mx-auto w-full max-w-3xl min-h-screen bg-[var(--color-bg)] border-x border-[var(--color-border)] shadow-[0_0_60px_-15px_rgba(0,150,255,0.15)] flex flex-col">
+      <div className="relative min-h-screen flex flex-col">
         <ToastProvider>
           <header className="z-40 bg-[var(--color-surface)]/85 backdrop-blur border-b border-[var(--color-border)]">
             <div className="flex items-center justify-between gap-3 px-4 h-16">
@@ -138,7 +138,7 @@ export default function HomePage() {
           </main>
 
           <nav
-            className="fixed bottom-0 left-0 right-0 mx-auto w-full max-w-3xl bg-[var(--color-surface)] border-t border-x border-[var(--color-border)] safe-bottom z-50 md:hidden"
+            className="fixed bottom-0 left-0 right-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-bottom z-50 md:hidden"
             role="navigation"
             aria-label="Основная навигация"
           >

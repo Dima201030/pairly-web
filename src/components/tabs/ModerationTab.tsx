@@ -227,7 +227,7 @@ export function ModerationTab() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 max-w-5xl mx-auto">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Модерация</h1>

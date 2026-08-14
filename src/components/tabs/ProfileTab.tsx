@@ -125,7 +125,7 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
       <div className="card p-5 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
         <div className="flex items-center gap-4">

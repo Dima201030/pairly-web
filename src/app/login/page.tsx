@@ -62,7 +62,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen pairly-bg">
-      <div className="relative mx-auto w-full max-w-3xl min-h-screen bg-[var(--color-bg)] border-x border-[var(--color-border)] shadow-[0_0_60px_-15px_rgba(0,150,255,0.15)] flex flex-col items-center justify-center p-4 overflow-hidden">
+      <div className="relative min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Брендовое свечение */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl brand-gradient" aria-hidden="true" />
 

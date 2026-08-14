@@ -202,7 +202,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
           onAction={() => onNavigate?.('create')}
         />
       ) : (
-        <div className="space-y-3" role="list" aria-label="Список матчей">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list" aria-label="Список матчей">
           {filteredMatches.map((match, index) => (
             <MatchCard
               key={match.id}

@@ -96,7 +96,7 @@ export function CreateMatchTab() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in">
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
       <div className="mb-4">
         <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Новая заявка</h1>
         <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Опишите игру — и игроки смогут записаться</p>

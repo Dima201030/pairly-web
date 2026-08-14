@@ -309,7 +309,7 @@ export function TournamentsTab() {
           description={isStaff ? 'Создайте первый турнир!' : 'Организаторы скоро добавят соревнования'}
         />
       ) : (
-        <div className="space-y-3" role="list">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list">
           {tournaments.map((t, index) => {
             const sportColor = sportColors[t.sport];
             const isJoined = t.participants.includes(profile?.uid || '');
