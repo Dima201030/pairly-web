@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { sportNames, levelNames, sportIcons, sportColors, tournamentStatusNames } from '@/lib/theme';
 import { Tournament, Sport, SkillLevel, NTRPRange } from '@/lib/types';
-import { collection, query, orderBy, onSnapshot, Timestamp, addDoc, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp, doc, setDoc, limit, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useEffect, useState, useRef } from 'react';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -73,7 +73,9 @@ export function TournamentsTab() {
     }
 
     try {
-      await addDoc(collection(db, 'tournaments'), {
+      const tournamentId = crypto.randomUUID();
+      await setDoc(doc(db, 'tournaments', tournamentId), {
+        id: tournamentId,
         title: form.title.trim(),
         sport: form.sport,
         city: form.city.trim(),

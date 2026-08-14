@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, addDoc, where, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, limit, updateDoc, doc, deleteDoc, setDoc, where, Timestamp } from 'firebase/firestore';
 import { UserProfile, UserRole, Tournament, SavedVenue, Match, SupportChat } from '@/lib/types';
 import { roleNames, supportStatusNames } from '@/lib/theme';
 import { useEffect, useState } from 'react';
@@ -182,7 +182,9 @@ export function ModerationTab() {
     if (!coords || !newVenue.name.trim()) return;
 
     try {
-      await addDoc(collection(db, 'venues'), {
+      const venueId = crypto.randomUUID();
+      await setDoc(doc(db, 'venues', venueId), {
+        id: venueId,
         name: newVenue.name.trim(),
         city: newVenue.city.trim(),
         district: newVenue.district.trim(),

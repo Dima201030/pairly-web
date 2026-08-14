@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { sportNames, levelNames, sportIcons } from '@/lib/theme';
 import { Sport, SkillLevel, SavedVenue } from '@/lib/types';
-import { collection, addDoc, Timestamp, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -53,7 +53,9 @@ export function CreateMatchTab() {
 
     setLoading(true);
     try {
-      await addDoc(collection(db, 'matches'), {
+      const matchId = crypto.randomUUID();
+      await setDoc(doc(db, 'matches', matchId), {
+        id: matchId,
         authorId: profile.uid,
         sport: form.sport,
         city: selectedVenue.city.trim(),

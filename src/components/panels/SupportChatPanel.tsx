@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   doc, onSnapshot, collection, query, orderBy,
-  where, limit as firestoreLimit, addDoc, updateDoc, getDocs, serverTimestamp,
+  where, limit as firestoreLimit, setDoc, updateDoc, getDocs, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { SupportChat, SupportMessage } from '@/lib/types';
@@ -64,7 +64,9 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             });
             return unsub;
           }
-          const created = await addDoc(collection(db, 'supportChats'), {
+          const chatId = crypto.randomUUID();
+          await setDoc(doc(db, 'supportChats', chatId), {
+            id: chatId,
             userID: profile.uid,
             userName: profile.displayName,
             userCity: profile.city ?? '',
@@ -78,7 +80,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             updatedAt: serverTimestamp(),
           });
           if (cancelled) return;
-          const unsub = onSnapshot(doc(db, 'supportChats', created.id), (s) => {
+          const unsub = onSnapshot(doc(db, 'supportChats', chatId), (s) => {
             if (s.exists()) setChat({ id: s.id, ...s.data() } as SupportChat);
             setReady(true);
           });
@@ -134,7 +136,9 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
     if (!trimmed || !profile || !chat) return;
     setSending(true);
     try {
-      await addDoc(collection(db, 'supportChats', chat.id, 'supportMessages'), {
+      const messageId = crypto.randomUUID();
+      await setDoc(doc(db, 'supportChats', chat.id, 'supportMessages', messageId), {
+        id: messageId,
         chatID: chat.id,
         authorID: profile.uid,
         authorName: profile.displayName,

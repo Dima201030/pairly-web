@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   doc, onSnapshot, collection, query, orderBy,
-  runTransaction, arrayUnion, arrayRemove, addDoc, serverTimestamp,
+  runTransaction, arrayUnion, arrayRemove, setDoc, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Match, ChatMessage } from '@/lib/types';
@@ -123,7 +123,9 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
     if (!trimmed || !profile) return;
     setSending(true);
     try {
-      await addDoc(collection(db, 'matches', matchId, 'messages'), {
+      const messageId = crypto.randomUUID();
+      await setDoc(doc(db, 'matches', matchId, 'messages', messageId), {
+        id: messageId,
         matchID: matchId,
         authorID: profile.uid,
         authorName: profile.displayName,
