@@ -253,7 +253,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
               {filterOptions.map(option => (
                 <div
                   key={option.key}
-                  onClick={() => setActiveFilter(option.key === 'ntrp' || option.key === 'level' ? option.key : option.key)}
+                  onClick={() => setActiveFilter(option.key as 'city' | 'sport' | 'level' | 'ntrp')}
                   role="menuitem"
                   style={{
                     padding: '0.5rem 1rem',
@@ -267,7 +267,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
                   </span>
                   {activeFilter === option.key && (
                     <span className="ml-auto text-xs font-medium" style={{ color: 'var(--color-accent)' }}>
-                      >>
+                      {">>"}
                     </span>
                   )}
                 </div>
@@ -350,7 +350,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
                             setSelectedNtrp(selectedNtrp === levelKey as NTRPLevel ? null : levelKey as NTRPLevel);
                             setSelectedLevel(null);
                           } else {
-                            setSelectedLevel(selectedLevel === l ? null : l);
+                            setSelectedLevel(selectedLevel === l ? null : l as SkillLevel);
                           }
                         }}
                         className={`pill text-xs ${(selectedSport === 'tennis' ? selectedNtrp : selectedLevel) === levelKey ? 'pill-active' : 'pill-inactive'}`}
