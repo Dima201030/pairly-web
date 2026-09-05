@@ -54,14 +54,16 @@ export function Sidebar({ open, onClose, activePage, onNavigate }: SidebarProps)
       />
 
       <aside
-        className={`fixed top-0 left-0 h-full z-[450] w-72 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden`}
+        className={`fixed top-0 left-0 h-full z-[450] w-72 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] md:hidden`}
         style={{
           transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          visibility: open ? 'visible' : 'hidden',
           background: 'var(--color-bg)',
           borderRight: '1px solid var(--color-border)',
         }}
         aria-label="Навигация"
         role="navigation"
+        aria-hidden={!open}
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center gap-3 px-5 h-16 border-b border-[var(--color-border)]">

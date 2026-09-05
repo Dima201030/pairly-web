@@ -237,7 +237,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             </p>
           )}
 
-          <div className="h-96 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+          <div className="h-[50vh] sm:h-96 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             {messages.length === 0 ? (
               <p className="text-center text-sm py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 {mode === 'user'
@@ -282,7 +282,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Сообщение..."
-                className="input-field"
+                className="input-field min-w-0"
                 maxLength={1000}
                 aria-label="Сообщение"
               />

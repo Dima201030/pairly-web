@@ -89,7 +89,7 @@ export function TournamentDetailPanel({ tournamentId, initial, onClose }: Tourna
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Место</p>
             <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{tournament.venue}</p>

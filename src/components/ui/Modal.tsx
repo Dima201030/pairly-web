@@ -46,7 +46,7 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-slide-up"
+      className="fixed inset-0 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center overflow-x-hidden animate-slide-up"
       style={{ background: 'rgba(0,0,0,0.7)' }}
       role="dialog"
       aria-modal="true"

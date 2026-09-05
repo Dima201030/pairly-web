@@ -157,7 +157,7 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
           <span className="badge badge-gray">{levelNames[match.level]}</span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Когда</p>
             <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{formatDate(match.startDate)}</p>
@@ -226,7 +226,7 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
             Чат матча
           </h3>
 
-          <div className="h-56 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+          <div className="h-44 sm:h-56 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             {messages.length === 0 ? (
               <p className="text-center text-sm py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 {canChat ? 'Сообщений пока нет — напишите первым!' : 'Сообщения появятся после записи'}
@@ -264,7 +264,7 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
                 value={text}
                 onChange={e => setText(e.target.value)}
                 placeholder="Сообщение участникам..."
-                className="input-field"
+                className="input-field min-w-0"
                 maxLength={500}
                 aria-label="Сообщение в чат"
               />

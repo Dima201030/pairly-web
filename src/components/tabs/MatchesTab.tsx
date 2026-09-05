@@ -234,7 +234,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void
         >
           <span aria-hidden="true">▼</span>
           Фильтры
-          <span className="ml-2 text-xs opacity-60">
+          <span className="ml-2 text-xs opacity-60 truncate max-w-[8rem]">
             {getFilterValue()}
           </span>
           {activeFilterCount > 0 && (
@@ -246,7 +246,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void
 
         {activeFilter && (
           <div
-            className="absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] max-w-80 max-h-[70vh] overflow-y-auto z-50 p-3 sm:p-4 space-y-3 sm:space-y-4"
+            className="absolute top-full left-0 mt-2 w-[min(calc(100vw-2rem),20rem)] max-h-[70vh] overflow-y-auto z-50 p-3 sm:p-4 space-y-3 sm:space-y-4"
             style={{
               background: 'var(--color-surface-elevated)',
               borderRadius: 'var(--radius-lg)',

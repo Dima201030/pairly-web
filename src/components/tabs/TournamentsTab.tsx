@@ -196,7 +196,7 @@ export function TournamentsTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-3 sm:px-4 space-y-4 animate-in">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Турниры</h1>
