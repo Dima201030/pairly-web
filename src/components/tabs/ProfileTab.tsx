@@ -130,163 +130,184 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-3 sm:px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
-      <div className="card p-5 relative overflow-hidden">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-2xl sm:text-4xl font-bold shrink-0" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
-            {profile.displayName[0].toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            {editing ? (
-              <input
-                value={editForm.displayName}
-                onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
-                className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] rounded px-1 text-[var(--color-text-primary)]"
-              />
-            ) : (
-              <h1 className="text-2xl font-bold truncate">{profile.displayName}</h1>
-            )}
-            <p className="text-[var(--color-text-tertiary)] text-sm truncate">{profile.email || 'Email не указан'}</p>
-            <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <span className={`badge ${getRoleBadge(profile.role)}`}>
-                {roleNames[profile.role] || profile.role}
-              </span>
-              {profile.rating > 0 && (
-                <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--color-highlight)' }}>
-                  {profile.rating.toFixed(1)}
-                </span>
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-3 sm:px-4 pt-4 animate-in max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row gap-5">
+        <div className="md:w-80 shrink-0 space-y-5">
+          <div className="card p-5 relative overflow-hidden">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center text-3xl md:text-4xl font-bold shrink-0 mb-3" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
+                {profile.displayName[0].toUpperCase()}
+              </div>
+              <div className="w-full">
+                {editing ? (
+                  <input
+                    value={editForm.displayName}
+                    onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+                    className="text-xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] rounded px-1 text-[var(--color-text-primary)] w-full text-center"
+                  />
+                ) : (
+                  <h1 className="text-xl font-bold truncate">{profile.displayName}</h1>
+                )}
+                <p className="text-[var(--color-text-tertiary)] text-sm truncate mt-0.5">{profile.email || 'Email не указан'}</p>
+                <div className="flex items-center justify-center gap-3 mt-2 flex-wrap">
+                  <span className={`badge ${getRoleBadge(profile.role)}`}>
+                    {roleNames[profile.role] || profile.role}
+                  </span>
+                  {profile.rating > 0 && (
+                    <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--color-highlight)' }}>
+                      {profile.rating.toFixed(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <StatCard value={myMatches.length} label="Матчей" />
+              <StatCard value={myTournaments.length} label="Турниров" />
+            </div>
+
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={toggleEdit}
+                className={`btn flex-1 ${editing ? 'btn-secondary' : 'btn-primary'}`}
+              >
+                {editing ? 'Отмена' : 'Редактировать'}
+              </button>
+              {editing && (
+                <button onClick={saveProfile} className="btn btn-primary flex-1">
+                  Сохранить
+                </button>
               )}
             </div>
           </div>
-        </div>
 
-        <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
-          <StatCard value={myMatches.length} label="Матчей" />
-          <StatCard value={myTournaments.length} label="Турниров" />
-        </div>
-
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={toggleEdit}
-            className={`btn flex-1 ${editing ? 'btn-secondary' : 'btn-primary'}`}
-          >
-            {editing ? 'Отмена' : 'Редактировать'}
-          </button>
           {editing && (
-            <button onClick={saveProfile} className="btn btn-primary flex-1">
-              Сохранить
-            </button>
-          )}
-        </div>
-      </div>
-
-      {editing && (
-        <div className="card p-5 space-y-4 animate-in">
-          <h3 className="font-semibold text-lg">Редактирование профиля</h3>
-          <div>
-            <label className="label">Имя</label>
-            <input
-              value={editForm.displayName}
-              onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
-              placeholder="Имя"
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="label">Город</label>
-            <input
-              value={editForm.city}
-              onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))}
-              placeholder="Город"
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="label">Спорт</label>
-            <select
-              value={editForm.sport}
-              onChange={e => setEditForm(f => ({ ...f, sport: e.target.value as Sport }))}
-              className="input-field"
-            >
-              <option value="">Спорт не выбран</option>
-              {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
-                <option key={s} value={s}>{sportNames[s]}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label">Уровень</label>
-            <select
-              value={editForm.level}
-              onChange={e => setEditForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
-              className="input-field"
-            >
-              {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
-                <option key={l} value={l}>{levelNames[l]}</option>
-              ))}
-            </select>
-          </div>
-          {editForm.sport === 'tennis' && (
-            <div>
-              <label className="label">NTRP</label>
-              <input
-                type="number"
-                step="0.1"
-                value={editForm.ntrp}
-                onChange={e => setEditForm(f => ({ ...f, ntrp: e.target.value }))}
-                placeholder="NTRP (например, 3.5)"
-                className="input-field"
-              />
+            <div className="card p-5 space-y-4 animate-in">
+              <h3 className="font-semibold text-lg">Редактирование профиля</h3>
+              <div>
+                <label className="label">Имя</label>
+                <input
+                  value={editForm.displayName}
+                  onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+                  placeholder="Имя"
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label">Город</label>
+                <input
+                  value={editForm.city}
+                  onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))}
+                  placeholder="Город"
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label">Спорт</label>
+                <select
+                  value={editForm.sport}
+                  onChange={e => setEditForm(f => ({ ...f, sport: e.target.value as Sport }))}
+                  className="input-field"
+                >
+                  <option value="">Спорт не выбран</option>
+                  {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
+                    <option key={s} value={s}>{sportNames[s]}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Уровень</label>
+                <select
+                  value={editForm.level}
+                  onChange={e => setEditForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
+                  className="input-field"
+                >
+                  {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
+                    <option key={l} value={l}>{levelNames[l]}</option>
+                  ))}
+                </select>
+              </div>
+              {editForm.sport === 'tennis' && (
+                <div>
+                  <label className="label">NTRP</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={editForm.ntrp}
+                    onChange={e => setEditForm(f => ({ ...f, ntrp: e.target.value }))}
+                    placeholder="NTRP (например, 3.5)"
+                    className="input-field"
+                  />
+                </div>
+              )}
             </div>
           )}
+
+          <div className="card p-4 space-y-2 md:hidden">
+            <button
+              onClick={() => setShowSupport(true)}
+              className="btn btn-outline btn-full"
+            >
+              Связаться с поддержкой
+            </button>
+            <button
+              onClick={() => logout()}
+              className="btn btn-danger btn-full"
+            >
+              Выйти из аккаунта
+            </button>
+          </div>
         </div>
-      )}
 
-      <ActivitySection
-        title="Мои матчи"
-        count={myMatches.length}
-        items={myMatches.slice(0, 5)}
-        renderItem={m => (
-          <ActivityItem
-            title={m.venue}
-            subtitle={formatDate(m.startDate)}
-            badge={
-              m.participants.includes(user?.uid || '')
-                ? <span className="badge badge-green">В игре</span>
-                : <span className="badge" style={{ backgroundColor: `${sportColors[m.sport]}20`, color: sportColors[m.sport] }}>{m.openSpots} мест</span>
-            }
+        <div className="flex-1 space-y-5">
+          <ActivitySection
+            title="Мои матчи"
+            count={myMatches.length}
+            items={myMatches.slice(0, 5)}
+            renderItem={m => (
+              <ActivityItem
+                title={m.venue}
+                subtitle={formatDate(m.startDate)}
+                badge={
+                  m.participants.includes(user?.uid || '')
+                    ? <span className="badge badge-green">В игре</span>
+                    : <span className="badge" style={{ backgroundColor: `${sportColors[m.sport]}20`, color: sportColors[m.sport] }}>{m.openSpots} мест</span>
+                }
+              />
+            )}
+            emptyMessage="Матчей пока нет"
           />
-        )}
-        emptyMessage="Матчей пока нет"
-      />
 
-      <ActivitySection
-        title="Мои турниры"
-        count={myTournaments.length}
-        items={myTournaments.slice(0, 5)}
-        renderItem={t => (
-          <ActivityItem
-            title={t.title}
-            subtitle={formatDate(t.startDate)}
-            badge={<span className="badge badge-gray">{t.participants.length}/{t.maxParticipants}</span>}
+          <ActivitySection
+            title="Мои турниры"
+            count={myTournaments.length}
+            items={myTournaments.slice(0, 5)}
+            renderItem={t => (
+              <ActivityItem
+                title={t.title}
+                subtitle={formatDate(t.startDate)}
+                badge={<span className="badge badge-gray">{t.participants.length}/{t.maxParticipants}</span>}
+              />
+            )}
+            emptyMessage="Турниров пока нет"
           />
-        )}
-        emptyMessage="Турниров пока нет"
-      />
 
-      <div className="card p-4 space-y-2">
-        <button
-          onClick={() => setShowSupport(true)}
-          className="btn btn-outline btn-full"
-        >
-          Связаться с поддержкой
-        </button>
-        <button
-          onClick={() => logout()}
-          className="btn btn-danger btn-full"
-        >
-          Выйти из аккаунта
-        </button>
+          <div className="hidden md:block card p-4 space-y-2">
+            <button
+              onClick={() => setShowSupport(true)}
+              className="btn btn-outline btn-full"
+            >
+              Связаться с поддержкой
+            </button>
+            <button
+              onClick={() => logout()}
+              className="btn btn-danger btn-full"
+            >
+              Выйти из аккаунта
+            </button>
+          </div>
+        </div>
       </div>
 
       {showSupport && (

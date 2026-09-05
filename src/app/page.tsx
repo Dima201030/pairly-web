@@ -86,7 +86,7 @@ export default function HomePage() {
   const renderPage = () => {
     switch (activePage) {
       case 'create':
-        return <CreateMatchTab />;
+        return <CreateMatchTab onCreated={() => navigate('matches')} />;
       case 'tournaments':
         return <TournamentsTab />;
       case 'moderation':

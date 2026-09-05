@@ -12,7 +12,11 @@ import { YandexMap } from '@/components/ui/YandexMap';
 
 const TWO_HOURS_FROM_NOW = Date.now() + 2 * 60 * 60 * 1000;
 
-export function CreateMatchTab() {
+interface CreateMatchTabProps {
+  onCreated?: () => void;
+}
+
+export function CreateMatchTab({ onCreated }: CreateMatchTabProps) {
   const { profile } = useAuth();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -80,6 +84,7 @@ export function CreateMatchTab() {
 
       showToast('Заявка создана!', 'success');
       setForm(f => ({ ...f, venueId: '', note: '' }));
+      onCreated?.();
     } catch {
       showToast('Ошибка при создании', 'error');
     } finally {

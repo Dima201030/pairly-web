@@ -33,7 +33,10 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
 
   useEffect(() => {
     const unsubMatch = onSnapshot(doc(db, 'matches', matchId), (snap) => {
-      if (!snap.exists()) return;
+      if (!snap.exists()) {
+        onClose();
+        return;
+      }
       const d = snap.data();
       setMatch({
         id: snap.id,
