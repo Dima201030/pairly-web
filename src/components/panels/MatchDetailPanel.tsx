@@ -29,6 +29,7 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
   const [sending, setSending] = useState(false);
   const [joining, setJoining] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     const unsubMatch = onSnapshot(doc(db, 'matches', matchId), (snap) => {
@@ -78,6 +79,10 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
   }, [matchId]);
 
   useEffect(() => {
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true;
+      return;
+    }
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 

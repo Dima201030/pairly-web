@@ -17,7 +17,7 @@ export const sportIcons: Record<string, string> = {
 };
 
 export const sportNames: Record<string, string> = {
-  padel: 'Падл',
+  padel: 'Падел',
   tennis: 'Теннис',
   badminton: 'Бадминтон',
   squash: 'Сквош',
