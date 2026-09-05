@@ -36,13 +36,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className={`pointer-events-auto px-4 py-3 rounded-xl shadow-[var(--shadow-lg)] border animate-slide-up ${
+            className={`pointer-events-auto px-4 py-3 rounded-[var(--radius-md)] border border-[var(--color-border)] shadow-[var(--shadow-lg)] animate-slide-up ${
               toast.type === 'error'
-                ? 'bg-[var(--color-red)] text-[var(--color-text-inverse)] border-transparent'
+                ? 'text-white'
                 : toast.type === 'success'
-                  ? 'bg-[var(--color-green)] text-[var(--color-text-inverse)] border-transparent'
-                  : 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-primary)] border-[var(--color-border)]'
+                  ? 'text-[var(--color-accent-on)]'
+                  : 'text-[var(--color-text-primary)]'
             }`}
+            style={{
+              background: toast.type === 'error'
+                ? 'var(--color-negative)'
+                : toast.type === 'success'
+                  ? 'var(--color-positive)'
+                  : 'var(--color-surface-elevated)',
+            }}
           >
             {toast.message}
           </div>

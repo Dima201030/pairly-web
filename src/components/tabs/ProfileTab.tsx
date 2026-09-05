@@ -92,7 +92,7 @@ export function ProfileTab() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center pb-24 md:pb-10">
-        <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка...</div>
+        <div className="animate-pulse-slow text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Загрузка...</div>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export function ProfileTab() {
               showToast('Профиль восстановлен', 'success');
             }}
             disabled={restoring}
-            className="btn btn-brand-gradient press-scale mt-6"
+            className="btn btn-primary press-scale mt-6"
           >
             {restoring ? 'Восстанавливаем...' : 'Восстановить профиль'}
           </button>
@@ -127,9 +127,8 @@ export function ProfileTab() {
   return (
     <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
       <div className="card p-5 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
         <div className="flex items-center gap-4">
-          <div className="relative w-24 h-24 rounded-2xl bg-[var(--color-brand)]/15 flex items-center justify-center text-4xl text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/30">
+          <div className="relative w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-bold" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
             {profile.displayName[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -137,7 +136,7 @@ export function ProfileTab() {
               <input
                 value={editForm.displayName}
                 onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
-                className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] rounded px-1 text-[var(--color-text-primary)]"
+                className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)] rounded px-1 text-[var(--color-text-primary)]"
               />
             ) : (
               <h1 className="text-2xl font-bold truncate">{profile.displayName}</h1>
@@ -148,7 +147,7 @@ export function ProfileTab() {
                 {roleNames[profile.role] || profile.role}
               </span>
               {profile.rating > 0 && (
-                <span className="flex items-center gap-1 text-[var(--color-yellow)] font-semibold">
+                <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--color-highlight)' }}>
                   ⭐ {profile.rating.toFixed(1)}
                 </span>
               )}
@@ -169,7 +168,7 @@ export function ProfileTab() {
             {editing ? 'Отмена' : 'Редактировать'}
           </button>
           {editing && (
-            <button onClick={saveProfile} className="btn btn-brand-gradient flex-1">
+            <button onClick={saveProfile} className="btn btn-primary flex-1">
               Сохранить
             </button>
           )}
@@ -179,46 +178,61 @@ export function ProfileTab() {
       {editing && (
         <div className="card p-5 space-y-4 animate-in">
           <h3 className="font-semibold text-lg">Редактирование профиля</h3>
-          <input
-            value={editForm.displayName}
-            onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
-            placeholder="Имя"
-            className="input-field"
-          />
-          <input
-            value={editForm.city}
-            onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))}
-            placeholder="Город"
-            className="input-field"
-          />
-          <select
-            value={editForm.sport}
-            onChange={e => setEditForm(f => ({ ...f, sport: e.target.value as Sport }))}
-            className="input-field"
-          >
-            <option value="">Спорт не выбран</option>
-            {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
-              <option key={s} value={s}>{sportNames[s]}</option>
-            ))}
-          </select>
-          <select
-            value={editForm.level}
-            onChange={e => setEditForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
-            className="input-field"
-          >
-            {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
-              <option key={l} value={l}>{levelNames[l]}</option>
-            ))}
-          </select>
-          {editForm.sport === 'tennis' && (
+          <div>
+            <label className="label">Имя</label>
             <input
-              type="number"
-              step="0.1"
-              value={editForm.ntrp}
-              onChange={e => setEditForm(f => ({ ...f, ntrp: e.target.value }))}
-              placeholder="NTRP (например, 3.5)"
+              value={editForm.displayName}
+              onChange={e => setEditForm(f => ({ ...f, displayName: e.target.value }))}
+              placeholder="Имя"
               className="input-field"
             />
+          </div>
+          <div>
+            <label className="label">Город</label>
+            <input
+              value={editForm.city}
+              onChange={e => setEditForm(f => ({ ...f, city: e.target.value }))}
+              placeholder="Город"
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="label">Спорт</label>
+            <select
+              value={editForm.sport}
+              onChange={e => setEditForm(f => ({ ...f, sport: e.target.value as Sport }))}
+              className="input-field"
+            >
+              <option value="">Спорт не выбран</option>
+              {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
+                <option key={s} value={s}>{sportNames[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label">Уровень</label>
+            <select
+              value={editForm.level}
+              onChange={e => setEditForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
+              className="input-field"
+            >
+              {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
+                <option key={l} value={l}>{levelNames[l]}</option>
+              ))}
+            </select>
+          </div>
+          {editForm.sport === 'tennis' && (
+            <div>
+              <label className="label">NTRP</label>
+              <input
+                type="number"
+                step="0.1"
+                value={editForm.ntrp}
+                onChange={e => setEditForm(f => ({ ...f, ntrp: e.target.value }))}
+                placeholder="NTRP (например, 3.5)"
+                className="input-field"
+              />
+            </div>
           )}
         </div>
       )}
@@ -287,9 +301,9 @@ interface StatCardProps {
 
 function StatCard({ value, label, icon }: StatCardProps) {
   return (
-    <div className="p-4 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)] text-center">
+    <div className="card p-4 text-center">
       <div className="text-xl" aria-hidden="true">{icon}</div>
-      <div className="text-3xl font-bold brand-gradient-text">{value}</div>
+      <div className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</div>
       <div className="text-xs text-[var(--color-text-tertiary)]">{label}</div>
     </div>
   );
@@ -308,10 +322,10 @@ function ActivitySection<T>({ title, count, items, renderItem, emptyMessage }: A
     <div className="card overflow-hidden">
       <div className="px-4 py-3 border-b border-[var(--color-divider)] flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
-          <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+          <span className="w-1.5 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
           {title}
         </h3>
-        <span className="badge bg-[var(--color-brand)]/15 text-[var(--color-brand)]">{count}</span>
+        <span className="badge" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-secondary)' }}>{count}</span>
       </div>
       {items.length === 0 ? (
         <div className="p-8 text-center text-[var(--color-text-tertiary)]">{emptyMessage}</div>

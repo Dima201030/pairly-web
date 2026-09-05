@@ -158,15 +158,15 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-text-tertiary)]">Когда</p>
-            <p className="font-semibold text-sm mt-0.5">📅 {formatDate(match.startDate)}</p>
-            <p className="text-[var(--color-brand)] font-medium text-sm">⏱️ {timeUntil(match.startDate)}</p>
+          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Когда</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>📅 {formatDate(match.startDate)}</p>
+            <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>⏱️ {timeUntil(match.startDate)}</p>
           </div>
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-text-tertiary)]">Места</p>
-            <p className="font-semibold text-sm mt-0.5">{match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}</p>
-            <p className="text-xs text-[var(--color-text-tertiary)]">из {match.totalSpots}</p>
+          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Места</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>из {match.totalSpots}</p>
           </div>
         </div>
 
@@ -177,29 +177,29 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
         )}
 
         {match.note && (
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-divider)] text-sm text-[var(--color-text-secondary)]">
+          <div className="p-3 rounded-xl text-sm" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-secondary)' }}>
             {match.note}
           </div>
         )}
 
         <div>
           <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+            <span className="w-1 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
             Участники ({match.participants.length}/{match.totalSpots})
           </h3>
           <ul className="space-y-1.5">
             {match.participants.map((uid) => (
-              <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-divider)]">
-                <span className="w-8 h-8 shrink-0 rounded-full bg-[var(--color-brand)]/15 text-[var(--color-brand)] font-bold flex items-center justify-center text-sm">
+              <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                <span className="w-8 h-8 shrink-0 rounded-full font-bold flex items-center justify-center text-sm" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
                   {(participantName(uid) || '?')[0].toUpperCase()}
                 </span>
-                <span className="font-medium truncate">{participantName(uid)}</span>
+                <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{participantName(uid)}</span>
                 {uid === match.authorId && <span className="badge badge-blue ml-auto">Хост</span>}
                 {uid === profile?.uid && <span className="badge badge-green ml-auto">Вы</span>}
               </li>
             ))}
             {match.participants.length === 0 && (
-              <li className="text-sm text-[var(--color-text-tertiary)]">Пока никто не записан</li>
+              <li className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Пока никто не записан</li>
             )}
           </ul>
         </div>
@@ -220,15 +220,15 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
           )}
         </div>
 
-        <div className="border-t border-[var(--color-divider)] pt-4">
+        <div style={{ borderTop: '1px solid var(--color-divider)' }} className="pt-4">
           <h3 className="font-semibold mb-3 flex items-center gap-2">
-            <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+            <span className="w-1 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
             Чат матча
           </h3>
 
-          <div className="h-56 overflow-y-auto space-y-2.5 p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+          <div className="h-56 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             {messages.length === 0 ? (
-              <p className="text-center text-sm text-[var(--color-text-tertiary)] py-6">
+              <p className="text-center text-sm py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 {canChat ? 'Сообщений пока нет — напишите первым!' : 'Сообщения появятся после записи'}
               </p>
             ) : (
@@ -238,12 +238,16 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
                   <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
                       mine
-                        ? 'brand-gradient text-[var(--color-text-on-brand)] rounded-br-md'
-                        : 'bg-[var(--color-surface-secondary)] border border-[var(--color-divider)] rounded-bl-md'
-                    }`}>
-                      {!mine && <p className="text-xs font-semibold mb-0.5 text-[var(--color-brand-green)]">{m.authorName}</p>}
+                        ? 'rounded-br-md'
+                        : 'rounded-bl-md'
+                    }`} style={{
+                      background: mine ? 'var(--color-accent)' : 'var(--color-surface)',
+                      color: mine ? 'var(--color-accent-on)' : 'var(--color-text-primary)',
+                      border: mine ? 'none' : '1px solid var(--color-divider)',
+                    }}>
+                      {!mine && <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--color-text-primary)' }}>{m.authorName}</p>}
                       <p className="break-words whitespace-pre-wrap">{m.text}</p>
-                      <p className={`text-[10px] mt-1 ${mine ? 'opacity-80' : 'text-[var(--color-text-tertiary)]'}`}>
+                      <p className={`text-[10px] mt-1 ${mine ? 'opacity-80' : ''}`} style={!mine ? { color: 'var(--color-text-tertiary)' } : undefined}>
                         {new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(m.sentAt)}
                       </p>
                     </div>
@@ -264,12 +268,12 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
                 maxLength={500}
                 aria-label="Сообщение в чат"
               />
-              <button type="submit" disabled={sending || !text.trim()} className="btn btn-brand-gradient shrink-0">
+              <button type="submit" disabled={sending || !text.trim()} className="btn btn-primary btn-sm shrink-0">
                 {sending ? '...' : '➤'}
               </button>
             </form>
           ) : (
-            <p className="text-sm text-[var(--color-text-tertiary)] mt-3">
+            <p className="text-sm mt-3" style={{ color: 'var(--color-text-tertiary)' }}>
               Запишитесь в матч, чтобы писать в чат
             </p>
           )}

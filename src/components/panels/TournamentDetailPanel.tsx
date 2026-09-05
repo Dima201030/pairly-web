@@ -90,22 +90,22 @@ export function TournamentDetailPanel({ tournamentId, initial, onClose }: Tourna
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-text-tertiary)]">Место</p>
-            <p className="font-semibold text-sm mt-0.5">{tournament.venue}</p>
-            <p className="text-xs text-[var(--color-text-tertiary)]">{tournament.city}{tournament.district ? ` · ${tournament.district}` : ''}</p>
+          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Место</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{tournament.venue}</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{tournament.city}{tournament.district ? ` · ${tournament.district}` : ''}</p>
           </div>
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-border)]">
-            <p className="text-xs text-[var(--color-text-tertiary)]">Дата начала</p>
-            <p className="font-semibold text-sm mt-0.5">📅 {formatDate(tournament.startDate)}</p>
-            <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
+          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Дата начала</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>📅 {formatDate(tournament.startDate)}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
               ⏰ Рег. до {formatDate(tournament.registrationDeadline || tournament.startDate)}
             </p>
           </div>
         </div>
 
         {tournament.note && (
-          <div className="p-3 rounded-xl bg-[var(--color-surface-secondary)] border border-[var(--color-divider)] text-sm text-[var(--color-text-secondary)]">
+          <div className="p-3 rounded-xl text-sm" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-secondary)' }}>
             {tournament.note}
           </div>
         )}
@@ -113,21 +113,21 @@ export function TournamentDetailPanel({ tournamentId, initial, onClose }: Tourna
         <div>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold flex items-center gap-2">
-              <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+              <span className="w-1 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
               Участники ({tournament.participants.length}/{tournament.maxParticipants})
             </h3>
-            <span className="text-xs text-[var(--color-text-tertiary)]">Организатор: {tournament.organizerName}</span>
+            <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Организатор: {tournament.organizerName}</span>
           </div>
-          <div className="h-1.5 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden mb-3">
-            <div className="h-full brand-gradient transition-all duration-500" style={{ width: `${spotsPct}%` }} />
+          <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: 'var(--color-surface-hover)' }}>
+            <div className="h-full transition-all duration-500" style={{ width: `${spotsPct}%`, background: 'var(--color-accent)' }} />
           </div>
           <ul className="space-y-1.5">
             {tournament.participants.map(uid => (
-              <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-divider)]">
-                <span className="w-8 h-8 shrink-0 rounded-full bg-[var(--color-brand)]/15 text-[var(--color-brand)] font-bold flex items-center justify-center text-sm">
+              <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                <span className="w-8 h-8 shrink-0 rounded-full font-bold flex items-center justify-center text-sm" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
                   {(participantName(uid) || '?')[0].toUpperCase()}
                 </span>
-                <span className="font-medium truncate">{participantName(uid)}</span>
+                <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{participantName(uid)}</span>
                 {uid === tournament.organizerID && <span className="badge badge-blue ml-auto">Организатор</span>}
                 {uid === profile?.uid && <span className="badge badge-green ml-auto">Вы</span>}
               </li>

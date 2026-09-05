@@ -89,30 +89,30 @@ export function CreateMatchTab() {
 
   if (!profile) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10">
+      <div className="flex-1 flex items-center justify-center pb-24 md:pb-6">
         <div className="text-center px-4 animate-in">
-          <div className="text-5xl mb-3">🔐</div>
-          <p className="text-lg font-medium text-[var(--color-text-secondary)]">Войдите, чтобы создать заявку</p>
+          <div className="text-4xl mb-3">🔐</div>
+          <p className="text-base font-medium" style={{ color: 'var(--color-text-secondary)' }}>Войдите, чтобы создать заявку</p>
         </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
-      <div className="mb-4">
-        <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Новая заявка</h1>
-        <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Опишите игру — и игроки смогут записаться</p>
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-6 px-4 pt-5 space-y-4 animate-in max-w-2xl mx-auto">
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Новая заявка</h1>
+        <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Опишите игру — и игроки смогут записаться</p>
       </div>
 
       <Section step="1" title="Спорт">
-        <div className="flex gap-2 overflow-x-auto pb-2" role="radiogroup">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="radiogroup">
           {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(sport => (
             <label
               key={sport}
-              className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all press-scale ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all press-scale shrink-0 ${
                 form.sport === sport
-                  ? 'border-[var(--color-brand)] bg-[var(--color-brand)]/10 shadow-[0_0_0_1px_var(--color-brand)]/20'
+                  ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
               }`}
             >
@@ -124,8 +124,8 @@ export function CreateMatchTab() {
                 onChange={() => setForm(f => ({ ...f, sport, venueId: '' }))}
                 className="sr-only"
               />
-              <span className="text-2xl">{sportIcons[sport]}</span>
-              <span className="font-medium">{sportNames[sport]}</span>
+              <span className="text-lg">{sportIcons[sport]}</span>
+              <span className="text-sm font-medium">{sportNames[sport]}</span>
             </label>
           ))}
         </div>
@@ -133,7 +133,7 @@ export function CreateMatchTab() {
 
       <Section step="2" title="Место">
         {venuesLoading ? (
-          <div className="text-center py-6 text-[var(--color-text-tertiary)]">Загрузка клубов...</div>
+          <div className="text-center py-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Загрузка клубов...</div>
         ) : filteredVenues.length === 0 ? (
           <EmptyState
             icon="🏟️"
@@ -142,10 +142,11 @@ export function CreateMatchTab() {
             variant="compact"
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="label">Клуб *</label>
+              <label className="label" htmlFor="venue">Клуб</label>
               <select
+                id="venue"
                 value={form.venueId}
                 onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
                 className="input-field"
@@ -159,16 +160,15 @@ export function CreateMatchTab() {
             </div>
 
             {selectedVenue && (selectedVenue.latitude !== 0 || selectedVenue.longitude !== 0) && (
-              <MapPreview
-                lat={selectedVenue.latitude}
-                lng={selectedVenue.longitude}
-                name={selectedVenue.name}
-              />
+              <div className="rounded-xl overflow-hidden">
+                <YandexMap lat={selectedVenue.latitude} lng={selectedVenue.longitude} height={160} />
+              </div>
             )}
 
             <div>
-              <label className="label">Дата и время *</label>
+              <label className="label" htmlFor="startDate">Дата и время</label>
               <input
+                id="startDate"
                 type="datetime-local"
                 value={form.startDate.toISOString().slice(0, 16)}
                 onChange={e => setForm(f => ({ ...f, startDate: new Date(e.target.value) }))}
@@ -183,8 +183,9 @@ export function CreateMatchTab() {
       <Section step="3" title="Уровень и места">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Уровень</label>
+            <label className="label" htmlFor="level">Уровень</label>
             <select
+              id="level"
               value={form.level}
               onChange={e => setForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
               className="input-field"
@@ -195,8 +196,9 @@ export function CreateMatchTab() {
             </select>
           </div>
           <div>
-            <label className="label">Свободных мест</label>
+            <label className="label" htmlFor="openSpots">Свободных мест</label>
             <input
+              id="openSpots"
               type="number"
               min="1"
               max="20"
@@ -209,8 +211,9 @@ export function CreateMatchTab() {
 
         {form.sport === 'tennis' && (
           <div>
-            <label className="label">Формат</label>
+            <label className="label" htmlFor="tennisType">Формат</label>
             <select
+              id="tennisType"
               value={form.tennisType}
               onChange={e => setForm(f => ({ ...f, tennisType: e.target.value as 'singles' | 'doubles' }))}
               className="input-field"
@@ -222,12 +225,12 @@ export function CreateMatchTab() {
         )}
       </Section>
 
-      <Section step="4" title="Комментарий (необязательно)">
+      <Section step="4" title="Комментарий">
         <textarea
           value={form.note}
           onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
           rows={3}
-          placeholder="Дополнительная информация..."
+          placeholder="Дополнительная информация (необязательно)"
           className="input-field resize-none"
         />
       </Section>
@@ -235,7 +238,7 @@ export function CreateMatchTab() {
       <button
         type="submit"
         disabled={loading || !form.venueId}
-        className="btn btn-brand-gradient btn-full btn-lg press-scale"
+        className="btn btn-primary btn-full py-3.5"
       >
         {loading ? 'Создание...' : 'Создать заявку'}
       </button>
@@ -251,11 +254,12 @@ interface SectionProps {
 
 function Section({ step, title, children }: SectionProps) {
   return (
-    <div className="card p-5 space-y-4 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--color-divider)]" aria-hidden="true" />
-      <div className="absolute top-0 left-0 h-0.5 brand-gradient w-16" aria-hidden="true" />
-      <h3 className="font-semibold text-lg flex items-center gap-2.5">
-        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--color-brand)]/15 text-[var(--color-brand)] text-sm font-bold flex items-center justify-center">
+    <div className="card p-4 space-y-3">
+      <h3 className="font-semibold text-sm flex items-center gap-2.5" style={{ color: 'var(--color-text-primary)' }}>
+        <span
+          className="flex-shrink-0 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center"
+          style={{ background: 'var(--color-accent)', color: 'var(--color-accent-on)' }}
+        >
           {step}
         </span>
         {title}
@@ -263,14 +267,4 @@ function Section({ step, title, children }: SectionProps) {
       {children}
     </div>
   );
-}
-
-interface MapPreviewProps {
-  lat: number;
-  lng: number;
-  name: string;
-}
-
-function MapPreview({ lat, lng, name }: MapPreviewProps) {
-  return <YandexMap lat={lat} lng={lng} height={200} />;
 }

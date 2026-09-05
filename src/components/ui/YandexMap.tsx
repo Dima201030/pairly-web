@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 declare global {
   interface Window {
     ymaps: any;
+    __ymapsLoading?: boolean;
   }
 }
 
@@ -16,92 +17,125 @@ interface YandexMapProps {
   className?: string;
 }
 
-export function YandexMap({ lat, lng, zoom = 15, height = 200, className = '' }: YandexMapProps) {
+export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }: YandexMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || mapInstanceRef.current) return;
+    const container = mapRef.current;
 
     const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
     if (!apiKey) {
       setError(true);
-      setLoading(false);
       return;
     }
 
-    const loadYandexMaps = async () => {
-      if (window.ymaps) {
-        initMap();
-        return;
-      }
+    let destroyed = false;
 
-      const script = document.createElement('script');
-      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`;
-      script.async = true;
-      script.onload = () => initMap();
-      script.onerror = () => {
-        setError(true);
-        setLoading(false);
-      };
-      document.head.appendChild(script);
-    };
-
-    const initMap = async () => {
+    const initMap = () => {
       try {
-        await window.ymaps.ready();
-        
-        if (!mapRef.current) return;
+        if (destroyed || !window.ymaps || !container) return;
 
-        const map = new window.ymaps.Map(mapRef.current, {
+        const ymaps = window.ymaps;
+
+        const map = new ymaps.Map(container, {
           center: [lat, lng],
           zoom,
-          controls: ['zoom', 'fullscreen'],
+          controls: [],
+        }, {
+          suppressMapOpenBlock: true,
         });
 
-        const placemark = new window.ymaps.Placemark([lat, lng], {}, {
-          preset: 'islands#blueDotIcon',
-        });
+        const placemark = new ymaps.Placemark(
+          [lat, lng],
+          {},
+          {
+            preset: 'islands#dot',
+            iconColor: '#0096FF',
+          }
+        );
 
         map.geoObjects.add(placemark);
         mapInstanceRef.current = map;
-        setLoading(false);
-      } catch {
-        setError(true);
-        setLoading(false);
+      } catch (e) {
+        console.error('[YandexMap] Init error:', e);
+        if (!destroyed) setError(true);
       }
     };
 
-    loadYandexMaps();
+    const onReady = () => {
+      if (destroyed) return;
+      try {
+        window.ymaps.ready(() => {
+          if (!destroyed) initMap();
+        });
+      } catch (e) {
+        console.error('[YandexMap] ready() error:', e);
+        if (!destroyed) setError(true);
+      }
+    };
+
+    if (window.ymaps) {
+      onReady();
+    } else if (window.__ymapsLoading) {
+      const check = setInterval(() => {
+        if (window.ymaps) {
+          clearInterval(check);
+          onReady();
+        }
+      }, 100);
+    } else {
+      window.__ymapsLoading = true;
+      const script = document.createElement('script');
+      script.src = `https://api-maps.yandex.ru/2.1/?apikey=${apiKey}&lang=ru_RU`;
+      script.async = true;
+      script.onload = () => onReady();
+      script.onerror = () => {
+        window.__ymapsLoading = false;
+        if (!destroyed) setError(true);
+      };
+      document.head.appendChild(script);
+    }
 
     return () => {
+      destroyed = true;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.destroy();
+        try { mapInstanceRef.current.destroy(); } catch {}
         mapInstanceRef.current = null;
       }
     };
   }, [lat, lng, zoom]);
 
+  const mapsUrl = `https://yandex.ru/maps/?pt=${lng},${lat}&z=16&ll=${lng},${lat}&spn=0.005,0.005&text=${lat},${lng}`;
+
   if (error) {
     return (
-      <div className={`rounded-xl overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
-        <div className="w-full h-full flex items-center justify-center bg-[var(--color-surface-secondary)] text-[var(--color-text-tertiary)] text-sm">
-          Карта недоступна
-        </div>
+      <div className={`rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full h-full flex items-center justify-center bg-[var(--color-surface)] text-[var(--color-text-secondary)] text-sm hover:text-[var(--color-accent)] transition-colors"
+        >
+          Открыть на Яндекс Картах
+        </a>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-xl overflow-hidden border border-[var(--color-border)] relative ${className}`} style={{ height }}>
-      {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-[var(--color-surface-secondary)]">
-          <div className="animate-pulse text-[var(--color-text-tertiary)] text-sm">Загрузка карты...</div>
-        </div>
-      )}
+    <div className={`rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
       <div ref={mapRef} className="w-full h-full" />
+      <a
+        href={mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-2 right-2 px-2 py-1 rounded-[var(--radius-md)] bg-[var(--color-surface)]/80 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] backdrop-blur-sm border border-[var(--color-border)]"
+      >
+        Открыть в Картах
+      </a>
     </div>
   );
 }

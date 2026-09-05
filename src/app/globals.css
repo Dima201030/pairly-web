@@ -1,77 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  /* Брендовая пара: синий (основной) + зелёный (акцент) */
-  --color-brand: #0096FF;
-  --color-brand-dark: #0077CC;
-  --color-brand-light: #33AEFF;
+  /* ── COLOR SYSTEM ── */
+  /* Base: deep blue-black, NOT pure black */
+  --color-bg: #080c12;
+  --color-bg-alt: #0c1018;
+  --color-surface: #111820;
+  --color-surface-hover: #182030;
+  --color-surface-elevated: #1a2435;
+  --color-surface-glass: rgba(17, 24, 32, 0.7);
 
-  --color-brand-green: #00D4AA;
-  --color-brand-green-dark: #00B894;
-  --color-brand-green-light: #33E8C4;
+  /* Ink levels — blue-tinted for depth on dark */
+  --color-text-primary: #e8edf4;
+  --color-text-secondary: #8b95a8;
+  --color-text-tertiary: #556075;
+  --color-text-inverse: #080c12;
 
-  --color-brand-blue: #0096FF;
-  --color-brand-blue-dark: #0077CC;
-  --color-brand-blue-light: #33AEFF;
+  /* Accent: vibrant teal — the brand color */
+  --color-accent: #00d4aa;
+  --color-accent-dim: #00a888;
+  --color-accent-bright: #00f0c0;
+  --color-accent-subtle: rgba(0, 212, 170, 0.12);
+  --color-accent-on: #080c12;
 
-  --color-bg: #05070B;
-  --color-bg-elevated: #0A0E14;
-  --color-surface: #0D1219;
-  --color-surface-hover: #141A23;
-  --color-surface-secondary: #1A212C;
-  --color-surface-tertiary: #222B38;
+  /* Secondary: warm amber for highlights */
+  --color-highlight: #ffb547;
+  --color-highlight-dim: #e09a30;
+  --color-highlight-subtle: rgba(255, 181, 71, 0.12);
 
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A0AEC0;
-  --color-text-tertiary: #718096;
-  --color-text-inverse: #000000;
-  --color-text-on-brand: #FFFFFF;
+  /* Semantic */
+  --color-positive: #34d399;
+  --color-positive-subtle: rgba(52, 211, 153, 0.12);
+  --color-negative: #f87171;
+  --color-negative-subtle: rgba(248, 113, 113, 0.12);
+  --color-warning: #fbbf24;
+  --color-warning-subtle: rgba(251, 191, 36, 0.12);
 
-  --color-red: #FC8181;
-  --color-red-light: #FEB2B2;
-  --color-red-dark: #C53030;
-  --color-green: #68D391;
-  --color-green-light: #9AE6B4;
-  --color-green-dark: #276749;
-  --color-orange: #F6AD55;
-  --color-orange-light: #FBD38D;
-  --color-yellow: #F6E05E;
-  --color-yellow-light: #FAF089;
+  /* Border / Divider */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-border-focus: rgba(0, 212, 170, 0.5);
+  --color-divider: rgba(255, 255, 255, 0.04);
 
-  --color-border: #2D2D2D;
-  --color-border-hover: #3D3D3D;
-  --color-border-focus: #0096FF;
-  --color-divider: #1A1A1A;
+  /* ── TYPOGRAPHY ── */
+  /* Scale: Major third 1.250 */
+  --step--1: 0.8rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.563rem;
+  --step-3: 1.953rem;
+  --step-4: 2.441rem;
+  --step-5: 3.052rem;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
-  --shadow-lg: 0 12px 28px rgba(0,0,0,0.6);
-  --shadow-xl: 0 20px 40px rgba(0,0,0,0.7);
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.4);
-  --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.55);
-  --shadow-modal: 0 24px 48px rgba(0,0,0,0.7);
+  /* ── SPACING ── */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
 
+  /* ── RADIUS ── */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-2xl: 24px;
   --radius-full: 9999px;
-  --radius-card: 16px;
-  --radius-button: 12px;
-  --radius-pill: 9999px;
 
-  --transition-fast: 120ms ease-out;
-  --transition-base: 200ms ease-out;
-  --transition-slow: 300ms ease-out;
+  /* ── SHADOWS ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(0, 212, 170, 0.15);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
 
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-fixed: 300;
-  --z-modal-backdrop: 400;
+  /* ── MOTION ── */
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 350ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-INDEX ── */
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-dropdown: 300;
   --z-modal: 500;
   --z-toast: 600;
-  --z-tooltip: 700;
+
+  /* ── COMPAT ── */
+  --color-brand: var(--color-accent);
+  --color-brand-green: var(--color-accent);
+  --color-brand-blue: var(--color-accent);
+  --color-bg-elevated: var(--color-surface-elevated);
+  --color-red: var(--color-negative);
+  --color-red-light: var(--color-negative);
+  --color-red-dark: #dc2626;
+  --color-green: var(--color-positive);
+  --color-green-light: var(--color-positive);
+  --color-green-dark: #059669;
+  --color-orange: var(--color-highlight);
+  --color-orange-light: var(--color-highlight);
+  --color-yellow: var(--color-highlight);
+  --color-yellow-light: var(--color-highlight);
+  --color-border-hover: var(--color-border-hover);
+  --color-border-focus: var(--color-border-focus);
+  --color-on-brand: var(--color-accent-on);
 }
 
 @layer base {
@@ -83,11 +125,18 @@
 
   body {
     margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-instrument, 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
     background-color: var(--color-bg);
     color: var(--color-text-primary);
-    line-height: 1.5;
+    line-height: 1.55;
     min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-instrument, 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
   }
 
   * {
@@ -100,296 +149,420 @@
   }
 
   ::selection {
-    background-color: var(--color-brand);
-    color: var(--color-text-on-brand);
+    background-color: var(--color-accent);
+    color: var(--color-accent-on);
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--color-bg);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-surface-tertiary);
+    background: var(--color-text-tertiary);
     border-radius: var(--radius-full);
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border);
+    background: var(--color-text-secondary);
+  }
+
+  input, select, textarea {
+    font-family: inherit;
   }
 }
 
 @layer components {
+  /* ── GLASS SURFACES ── */
+  .glass {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border: 1px solid var(--color-border);
+  }
+
   .card {
-    @apply bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-card)];
-    transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition: all var(--dur) var(--ease);
   }
 
   .card:hover {
+    background: var(--color-surface-hover);
     border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-card-hover);
   }
 
   .card-interactive {
-    @apply bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-card)];
-    transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-fast);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     cursor: pointer;
+    transition: all var(--dur) var(--ease);
   }
 
   .card-interactive:hover {
-    border-color: color-mix(in srgb, var(--color-brand) 45%, var(--color-border));
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
   }
 
   .card-interactive:active {
-    transform: scale(0.99);
-    box-shadow: var(--shadow-card);
+    transform: translateY(0) scale(0.995);
   }
 
   .card-elevated {
-    @apply bg-[var(--color-surface)] rounded-[var(--radius-card)] border border-[var(--color-border)] shadow-[var(--shadow-lg)];
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
   }
 
   .card-filled {
-    @apply bg-[var(--color-surface-secondary)] rounded-[var(--radius-card)] border border-[var(--color-border)];
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
   }
 
+  /* ── BUTTONS ── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed;
-    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    border: none;
+    cursor: pointer;
+    transition: all var(--dur) var(--ease);
+    white-space: nowrap;
+    text-decoration: none;
   }
 
   .btn:active:not(:disabled) {
     transform: scale(0.97);
   }
 
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   .btn:focus-visible {
-    @apply ring-2 ring-[var(--color-border-focus)] ring-offset-2 ring-offset-[var(--color-bg)];
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-brand)] text-[var(--color-text-on-brand)];
-    transition: all var(--transition-fast);
+    background: var(--color-accent);
+    color: var(--color-accent-on);
+    font-weight: 700;
   }
 
-  .btn-primary:hover {
-    @apply bg-[var(--color-brand-light)];
-    box-shadow: 0 6px 24px -8px rgba(0, 150, 255, 0.55);
-  }
-
-  .btn-primary:active:not(:disabled) {
-    @apply bg-[var(--color-brand-dark)];
-  }
-
-  .btn-brand-gradient {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-text-on-brand)];
-    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-green) 130%);
-    transition: all var(--transition-fast);
-  }
-
-  .btn-brand-gradient:hover {
-    filter: brightness(1.12);
-    box-shadow: 0 6px 24px -8px rgba(0, 212, 170, 0.5);
-  }
-
-  .btn-brand-gradient:active:not(:disabled) {
-    filter: brightness(0.95);
-    box-shadow: none;
-  }
-
-  .btn-primary-blue {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-brand-blue)] text-white;
-    transition: all var(--transition-fast);
-  }
-
-  .btn-primary-blue:hover {
-    @apply bg-[var(--color-brand-blue-light)];
-  }
-
-  .btn-primary-blue:active:not(:disabled) {
-    @apply bg-[var(--color-brand-blue-dark)];
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-bright);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.25);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-[var(--color-brand-green)] border border-[var(--color-brand-green)];
-    transition: all var(--transition-fast);
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
   }
 
-  .btn-secondary:hover {
-    @apply bg-[var(--color-brand-green)] text-[var(--color-text-inverse)];
-  }
-
-  .btn-secondary:active:not(:disabled) {
-    @apply bg-[var(--color-brand-green-dark)] text-[var(--color-text-inverse)];
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-[var(--color-text-primary)];
-    transition: all var(--transition-fast);
+    background: transparent;
+    color: var(--color-text-secondary);
   }
 
-  .btn-ghost:hover {
-    @apply bg-[var(--color-surface-hover)];
-  }
-
-  .btn-ghost:active:not(:disabled) {
-    @apply bg-[var(--color-surface-secondary)];
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-[var(--color-red)] text-white;
-    transition: all var(--transition-fast);
+    background: var(--color-negative);
+    color: white;
   }
 
-  .btn-danger:hover {
-    @apply bg-[var(--color-red-dark)];
-  }
-
-  .btn-danger:active:not(:disabled) {
-    @apply bg-[var(--color-red-dark)];
+  .btn-danger:hover:not(:disabled) {
+    background: #ef4444;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-3 rounded-[var(--radius-button)] font-semibold text-base disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border border-[var(--color-border)] text-[var(--color-text-primary)];
-    transition: all var(--transition-fast);
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
   }
 
-  .btn-outline:hover {
-    @apply bg-[var(--color-surface-hover)] border-[var(--color-border-hover)];
+  .btn-outline:hover:not(:disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
   }
 
-  .btn-outline:active:not(:disabled) {
-    @apply bg-[var(--color-surface-secondary)];
+  .btn-brand-gradient {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dim));
+    color: var(--color-accent-on);
+    font-weight: 700;
+  }
+
+  .btn-brand-gradient:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--color-accent-bright), var(--color-accent));
+    box-shadow: 0 0 24px rgba(0, 212, 170, 0.3);
+  }
+
+  .btn-primary-blue {
+    background: var(--color-accent);
+    color: var(--color-accent-on);
+    font-weight: 700;
+  }
+
+  .btn-primary-blue:hover:not(:disabled) {
+    background: var(--color-accent-bright);
   }
 
   .btn-sm {
-    @apply px-3 py-2 text-sm;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+    border-radius: var(--radius-sm);
   }
 
   .btn-lg {
-    @apply px-6 py-4 text-lg;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
   }
 
   .btn-full {
-    @apply w-full;
+    width: 100%;
   }
 
+  /* ── INPUTS ── */
   .input-field {
-    @apply w-full px-4 py-3.5 rounded-[var(--radius-button)]
-           bg-[var(--color-surface-secondary)] border border-[var(--color-border)]
-           text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)]
-           disabled:opacity-50 disabled:cursor-not-allowed;
-    transition: all var(--transition-fast);
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    transition: all var(--dur) var(--ease);
+    outline: none;
   }
 
-  .input-field:focus-visible {
-    @apply outline-none ring-2 ring-[var(--color-border-focus)] border-transparent;
+  .input-field::placeholder {
+    color: var(--color-text-tertiary);
   }
 
-  .input-field:has(+ label):not(:placeholder-shown),
+  .input-field:hover {
+    border-color: var(--color-border-hover);
+  }
+
   .input-field:focus {
     border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+  }
+
+  .input-field:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  select.input-field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5L6 8.5L10 4.5' stroke='%23556075' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+  }
+
+  textarea.input-field {
+    resize: vertical;
+    min-height: 80px;
   }
 
   .label {
-    @apply block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5;
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.375rem;
+    letter-spacing: 0.01em;
   }
 
+  /* ── PILLS / CHIPS ── */
   .pill {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)]
-           text-sm font-medium whitespace-nowrap;
-    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all var(--dur) var(--ease);
   }
 
   .pill-active {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)]
-           text-sm font-medium whitespace-nowrap text-[var(--color-text-on-brand)];
-    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-green) 130%);
-    box-shadow: 0 2px 12px -4px rgba(0, 212, 170, 0.45);
-    transition: all var(--transition-fast);
-  }
-
-  .brand-gradient {
-    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-green) 130%);
-  }
-
-  .brand-gradient-text {
-    background: linear-gradient(135deg, var(--color-brand-light) 0%, var(--color-brand-green) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .text-brand-green {
-    color: var(--color-brand-green);
-  }
-
-  .text-brand-blue {
-    color: var(--color-brand-blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    background: var(--color-accent);
+    color: var(--color-accent-on);
   }
 
   .pill-inactive {
-    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-pill)]
-           text-sm font-medium whitespace-nowrap bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border)];
-    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    transition: all var(--dur) var(--ease);
   }
 
   .pill-inactive:hover {
-    @apply bg-[var(--color-surface-hover)] border-[var(--color-border-hover)] text-[var(--color-text-primary)];
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
   }
 
+  /* ── BADGES ── */
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)]
-           text-xs font-medium;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   .badge-green {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-green)]/15 text-[var(--color-green-light)];
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    background: var(--color-positive-subtle);
+    color: var(--color-positive);
   }
 
   .badge-red {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-red)]/15 text-[var(--color-red-light)];
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    background: var(--color-negative-subtle);
+    color: var(--color-negative);
   }
 
   .badge-yellow {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-yellow)]/15 text-[var(--color-yellow-light)];
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    background: var(--color-highlight-subtle);
+    color: var(--color-highlight);
   }
 
   .badge-blue {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-brand-blue)]/15 text-[var(--color-brand-blue-light)];
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    background: var(--color-accent-subtle);
+    color: var(--color-accent);
   }
 
   .badge-gray {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-[var(--radius-pill)] text-xs font-medium bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)];
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    background: var(--color-surface-hover);
+    color: var(--color-text-tertiary);
   }
 
+  /* ── DIVIDER ── */
   .divider {
-    @apply h-px bg-[var(--color-divider)] border-0;
+    height: 1px;
+    border: none;
+    background: var(--color-divider);
   }
 
+  /* ── SECTION ── */
   .section-title {
-    @apply text-xl font-bold text-[var(--color-text-primary)];
+    font-size: var(--step-1);
+    font-weight: 700;
+    color: var(--color-text-primary);
   }
 
   .section-subtitle {
-    @apply text-sm text-[var(--color-text-tertiary)];
+    font-size: 0.875rem;
+    color: var(--color-text-tertiary);
+  }
+
+  /* ── MESH GRADIENT BACKGROUND ── */
+  .mesh-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(0, 212, 170, 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(255, 181, 71, 0.05), transparent 50%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 168, 136, 0.04), transparent 50%),
+      var(--color-bg);
+    pointer-events: none;
+  }
+
+  /* ── GLOW ACCENT ── */
+  .glow-accent {
+    box-shadow: var(--shadow-glow);
   }
 }
 
 @layer utilities {
   .pairly-bg {
-    background-color: var(--color-surface-secondary);
-    background-image:
-      radial-gradient(720px 520px at 6% 12%, rgba(0, 150, 255, 0.10), transparent 60%),
-      radial-gradient(720px 520px at 94% 22%, rgba(0, 212, 170, 0.08), transparent 60%),
-      radial-gradient(900px 620px at 50% 108%, rgba(0, 150, 255, 0.07), transparent 62%),
-      radial-gradient(520px 420px at 95% 92%, rgba(0, 212, 170, 0.05), transparent 60%),
-      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-    background-size: auto, auto, auto, auto, 44px 44px, 44px 44px;
+    background-color: var(--color-bg);
   }
 
   .text-balance {
@@ -406,7 +579,7 @@
   }
 
   .animate-in {
-    animation: animateIn var(--transition-slow) ease-out forwards;
+    animation: animateIn var(--dur-slow) var(--ease-out) forwards;
   }
 
   .animate-in-delay-1 { animation-delay: 50ms; }
@@ -435,7 +608,7 @@
 @keyframes animateIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -444,7 +617,7 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -453,10 +626,23 @@
   50% { opacity: 0.5; }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .animate-slide-up {
-  animation: slideUp var(--transition-slow) ease-out;
+  animation: slideUp var(--dur-slow) var(--ease-out);
 }
 
 .animate-pulse-slow {
   animation: pulse 2s infinite;
 }
+
+.animate-shimmer {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+

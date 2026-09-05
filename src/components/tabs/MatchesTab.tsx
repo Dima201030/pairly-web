@@ -76,7 +76,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
           createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
         } as Match;
       });
-      
+
       setMatches(docs);
       setLoading(false);
     });
@@ -87,7 +87,9 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка матчей...</div>
+        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
+          Загрузка матчей...
+        </div>
       </div>
     );
   }
@@ -98,9 +100,6 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
 
     setJoiningId(match.id);
     try {
-      // Транзакция: проверка «мест нет» и повторное участие выполняются
-      // атомарно с записью — исключается уход openSpots в минус (гонка
-      // нескольких записей одновременно).
       await runTransaction(db, async (transaction) => {
         const snap = await transaction.get(matchRef);
         if (!snap.exists()) throw new Error('match_not_found');
@@ -145,18 +144,18 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const levels: SkillLevel[] = ['any', 'beginner', 'middle', 'advanced'];
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 animate-in">
-      <div className="flex items-end justify-between mb-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Матчи</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Матчи</h1>
+          <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             {filteredMatches.length === 0
               ? 'Свободных игр пока нет'
-              : `${filteredMatches.length} ${filteredMatches.length === 1 ? 'открытая игра' : filteredMatches.length < 5 ? 'открытые игры' : 'открытых игр'} рядом`}
+              : `${filteredMatches.length} открытых игр рядом`}
           </p>
         </div>
         {isStaff && (
-          <span className="pill bg-[var(--color-brand)] text-white shadow-md">
+          <span className="pill" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
             Персонал
           </span>
         )}
@@ -240,7 +239,7 @@ interface FilterBarProps<T extends string | null> {
 
 function FilterBar<T extends string | null>({ label, options, selected, onChange, renderOption }: FilterBarProps<T>) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" role="group" aria-label={label}>
+    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="group" aria-label={label}>
       {options.map((opt) => {
         const isSelected = selected === opt.value;
         const handleClick = () => onChange(isSelected ? null as T : opt.value);
@@ -278,83 +277,86 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
   const isJoined = match.participants.includes(profile?.uid || '');
   const sportColor = sportColors[match.sport];
   const hasMap = match.latitude !== 0 || match.longitude !== 0;
-  const spotsPct = match.totalSpots > 0
-    ? Math.max(0, Math.min(100, Math.round((match.openSpots / match.totalSpots) * 100)))
-    : 0;
 
   return (
     <article
-      className={`card p-4 flex flex-col gap-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : 'card-interactive'}`}
+      className={`card-interactive p-4 flex flex-col gap-3 animate-in ${isJoined ? 'border-[var(--color-accent)]/30' : ''}`}
       style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
       role="listitem"
       onClick={onOpen}
     >
-      <div className="flex gap-4">
-        <div className="relative flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border"
+      <div className="flex gap-3">
+        <div
+          className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
           style={{
-            backgroundColor: `${sportColor}14`,
-            borderColor: `${sportColor}40`,
-            boxShadow: `0 4px 16px -6px ${sportColor}55`,
-          }}>
+            backgroundColor: `${sportColor}18`,
+            border: `1px solid ${sportColor}30`,
+          }}
+        >
           <span aria-hidden="true">{sportIcons[match.sport]}</span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <h3 className="font-semibold text-lg truncate">{match.venue}</h3>
-            <span className="pill pill-inactive !py-0.5 text-xs shrink-0">
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+              {match.venue}
+            </h3>
+            <span className="pill pill-inactive !py-0.5 !text-[10px] shrink-0">
               {match.city}
             </span>
           </div>
-          <p className="text-sm text-[var(--color-text-tertiary)] truncate mb-2">{match.district}</p>
-
-          <div className="flex flex-wrap items-center gap-2 text-sm mb-2">
-            <span className="flex items-center gap-1 text-[var(--color-text-secondary)]">
-              <span aria-hidden="true">📅</span>
-              {formatDate(match.startDate)}
-            </span>
-            <span className="flex items-center gap-1 text-[var(--color-brand)] font-medium">
-              <span aria-hidden="true">⏱️</span>
-              {timeUntil(match.startDate)}
-            </span>
-            <span className="badge" style={{ backgroundColor: `${sportColor}1c`, color: sportColor }}>
-              {sportNames[match.sport]}
-            </span>
-            <span className="badge badge-gray">
-              {levelNames[match.level]}
-            </span>
-          </div>
-
-          {isJoined && (
-            <span className="pill brand-gradient text-xs text-[var(--color-text-on-brand)]">
-              ✓ Вы записаны
-            </span>
-          )}
-
-          {match.note && (
-            <p className="mt-2 text-sm text-[var(--color-text-tertiary)] line-clamp-2">{match.note}</p>
-          )}
-
-          {hasMap && (
-            <div className="mt-3">
-              <YandexMap lat={match.latitude} lng={match.longitude} height={120} />
-            </div>
-          )}
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{match.district}</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 border-t border-[var(--color-divider)] pt-3">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+          <span aria-hidden="true">📅</span>
+          {formatDate(match.startDate)}
+        </span>
+        <span className="font-semibold" style={{ color: 'var(--color-accent)' }}>
+          <span aria-hidden="true">⏱️</span>{' '}
+          {timeUntil(match.startDate)}
+        </span>
+        <span className="badge" style={{ backgroundColor: `${sportColor}18`, color: sportColor }}>
+          {sportNames[match.sport]}
+        </span>
+        <span className="badge badge-gray">
+          {levelNames[match.level]}
+        </span>
+      </div>
+
+      {isJoined && (
+        <div className="pill self-start" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
+          ✓ Вы записаны
+        </div>
+      )}
+
+      {match.note && (
+        <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-tertiary)' }}>{match.note}</p>
+      )}
+
+      {hasMap && (
+        <div className="rounded-xl overflow-hidden">
+          <YandexMap lat={match.latitude} lng={match.longitude} height={100} />
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-3 pt-2 border-t border-[var(--color-divider)]">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between text-sm mb-1.5">
-            <span className="font-semibold text-[var(--color-brand-green)]">
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span className="font-semibold" style={{ color: match.openSpots > 0 ? 'var(--color-positive)' : 'var(--color-text-tertiary)' }}>
               {match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}
             </span>
-            <span className="text-xs text-[var(--color-text-tertiary)]">из {match.totalSpots}</span>
+            <span style={{ color: 'var(--color-text-tertiary)' }}>из {match.totalSpots}</span>
           </div>
-          <div className="h-1.5 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden">
+          <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-hover)' }}>
             <div
-              className="h-full brand-gradient transition-all duration-500"
-              style={{ width: `${spotsPct}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${match.totalSpots > 0 ? Math.max(0, Math.min(100, Math.round((match.openSpots / match.totalSpots) * 100))) : 0}%`,
+                background: match.openSpots > 0 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+              }}
             />
           </div>
         </div>
@@ -365,7 +367,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
             disabled={joining}
             className="btn btn-outline btn-sm shrink-0"
           >
-            {joining ? 'Отмена...' : 'Покинуть'}
+            {joining ? '...' : 'Выйти'}
           </button>
         ) : (
           <button
@@ -373,7 +375,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
             disabled={joining || match.openSpots === 0}
             className={`btn btn-sm shrink-0 ${match.openSpots > 0 ? 'btn-primary' : 'btn-outline'}`}
           >
-            {joining ? 'Запись...' : match.openSpots > 0 ? 'Записаться' : 'Мест нет'}
+            {joining ? '...' : match.openSpots > 0 ? 'Записаться' : 'Мест нет'}
           </button>
         )}
       </div>

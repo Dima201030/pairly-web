@@ -110,7 +110,7 @@ export function ModerationTab() {
 
   if (!isStaff) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10 text-center text-[var(--color-text-secondary)] px-4">
+      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10 text-center px-4" style={{ color: 'var(--color-text-secondary)' }}>
         <div className="text-4xl mb-3">🛡️</div>
         <p className="text-lg font-medium">Доступно только модераторам</p>
       </div>
@@ -205,10 +205,10 @@ export function ModerationTab() {
   };
 
   const roleColors: Record<string, string> = {
-    user: 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]',
-    moderator: 'bg-[var(--color-brand)] text-white',
-    support: 'bg-[var(--color-green)]/15 text-[var(--color-green-light)]',
-    host: 'bg-[var(--color-yellow)]/15 text-[var(--color-yellow-light)]',
+    user: 'badge-gray',
+    moderator: 'badge-blue',
+    support: 'badge-green',
+    host: 'badge-yellow',
   };
 
   const visibleUsers = users.filter(user => {
@@ -233,10 +233,10 @@ export function ModerationTab() {
     <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 max-w-5xl mx-auto">
       <div className="flex items-end justify-between mb-4">
         <div>
-          <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Модерация</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Управление турнирами, игроками и клубами</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">Модерация</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Управление турнирами, игроками и клубами</p>
         </div>
-        <span className={`badge ${isHost ? 'badge-yellow' : 'bg-[var(--color-brand)]/15 text-[var(--color-brand)]'}`}>
+        <span className={isHost ? 'badge badge-yellow' : 'badge badge-blue'}>
           {isHost ? 'Хозяин' : 'Модератор'}
         </span>
       </div>
@@ -250,7 +250,9 @@ export function ModerationTab() {
             aria-controls="mod-panel"
             tabIndex={activeSection === s.id ? 0 : -1}
             className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
-              activeSection === s.id ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-md' : 'bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] border border-[var(--color-border)]'
+              activeSection === s.id
+                ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
+                : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]'
             }`}
             role="tab"
             aria-selected={activeSection === s.id}
@@ -273,24 +275,24 @@ export function ModerationTab() {
             className="input-field"
           />
           {visibleUsers.length === 0 ? (
-            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
+            <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
               <p className="font-medium">Никого не найдено</p>
             </div>
           ) : (
           visibleUsers.map(user => (
             <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
                   {user.displayName[0].toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{user.displayName}</p>
-                  <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
+                  <p className="text-sm truncate" style={{ color: 'var(--color-text-tertiary)' }}>{user.email || 'email не указан'}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${roleColors[user.role] || 'bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]'}`}>
+                    <span className={roleColors[user.role] || 'badge-gray'}>
                       {roleNames[user.role] || user.role}
                     </span>
-                    {user.blocked && <span className="text-xs text-[var(--color-red-light)] font-medium">🚫 Заблокирован</span>}
+                    {user.blocked && <span className="text-xs font-medium" style={{ color: 'var(--color-negative)' }}>🚫 Заблокирован</span>}
                   </div>
                 </div>
               </div>
@@ -299,7 +301,7 @@ export function ModerationTab() {
                   value={user.role}
                   onChange={e => changeRole(user.uid, e.target.value as UserRole)}
                   disabled={user.role === 'host' && !isHost}
-                  className="px-2 py-1 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-surface-secondary)] text-[var(--color-text-primary)]"
+                  className="input-field !py-1 !px-2"
                 >
                   <option value="user">Игрок</option>
                   <option value="moderator">Модератор</option>
@@ -308,7 +310,7 @@ export function ModerationTab() {
                 </select>
                 <button
                   onClick={() => toggleBlock(user.uid, user.blocked)}
-                  className={`px-3 py-1.5 text-sm rounded-lg font-medium ${user.blocked ? 'bg-[var(--color-green)]/15 text-[var(--color-green-light)]' : 'bg-[var(--color-red)]/15 text-[var(--color-red-light)]'}`}
+                  className={`btn btn-sm ${user.blocked ? 'btn-primary' : 'btn-danger'}`}
                 >
                   {user.blocked ? 'Разблокировать' : 'Заблокировать'}
                 </button>
@@ -328,7 +330,7 @@ export function ModerationTab() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold">{t.title}</h3>
-                  <p className="text-sm text-[var(--color-text-tertiary)]">{t.venue}, {t.city}</p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{t.venue}, {t.city}</p>
                 </div>
                 <span className={`badge ${t.status === 'open' ? 'badge-green' : t.status === 'finished' ? 'badge-gray' : 'badge-red'}`}>
                   {t.status === 'open' ? 'Открыт' : t.status === 'finished' ? 'Завершён' : 'Отменён'}
@@ -344,7 +346,7 @@ export function ModerationTab() {
           {matchesLoading ? (
             <div className="flex items-center justify-center py-8">Загрузка...</div>
           ) : matches.length === 0 ? (
-            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
+            <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
               <p className="font-medium">Матчей пока нет</p>
             </div>
           ) : (
@@ -353,8 +355,8 @@ export function ModerationTab() {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold truncate">{m.venue}</p>
-                    <p className="text-sm text-[var(--color-text-tertiary)]">{m.city}{m.district ? ` · ${m.district}` : ''}</p>
-                    <p className="text-xs text-[var(--color-text-tertiary)]/70 mt-0.5">
+                    <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{m.city}{m.district ? ` · ${m.district}` : ''}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)', opacity: 0.7 }}>
                       {new Date(m.startDate).toLocaleString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · {m.sport} · {m.level}
                     </p>
                   </div>
@@ -364,7 +366,7 @@ export function ModerationTab() {
                     </span>
                     <button
                       onClick={() => deleteMatch(m.id)}
-                      className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
+                      className="btn btn-danger btn-sm flex-shrink-0"
                     >
                       Удалить
                     </button>
@@ -379,7 +381,7 @@ export function ModerationTab() {
       {activeSection === 'venues' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-[var(--color-text-tertiary)]">{venues.length} мест</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{venues.length} мест</p>
             <button
               onClick={() => {
                 setShowAddVenue(false);
@@ -387,7 +389,7 @@ export function ModerationTab() {
                 setVenueCoords(null);
                 setManualCoords({ lat: '', lng: '' });
               }}
-              className="btn btn-brand-gradient btn-sm"
+              className="btn btn-primary btn-sm"
             >
               {showAddVenue ? 'Отмена' : '+ Добавить'}
             </button>
@@ -396,37 +398,46 @@ export function ModerationTab() {
           {showAddVenue && (
             <div className="card p-4 space-y-3">
               <h3 className="font-semibold">Новое место</h3>
-              <input
-                type="text"
-                placeholder="Название клуба *"
-                value={newVenue.name}
-                onChange={e => setNewVenue(v => ({ ...v, name: e.target.value }))}
-                className="input-field"
-              />
-              <input
-                type="text"
-                placeholder="Город"
-                value={newVenue.city}
-                onChange={e => setNewVenue(v => ({ ...v, city: e.target.value }))}
-                className="input-field"
-              />
-              <input
-                type="text"
-                placeholder="Район"
-                value={newVenue.district}
-                onChange={e => setNewVenue(v => ({ ...v, district: e.target.value }))}
-                className="input-field"
-              />
+              <div>
+                <label className="label">Название клуба *</label>
+                <input
+                  type="text"
+                  placeholder="Название клуба"
+                  value={newVenue.name}
+                  onChange={e => setNewVenue(v => ({ ...v, name: e.target.value }))}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label">Город</label>
+                <input
+                  type="text"
+                  placeholder="Город"
+                  value={newVenue.city}
+                  onChange={e => setNewVenue(v => ({ ...v, city: e.target.value }))}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label">Район</label>
+                <input
+                  type="text"
+                  placeholder="Район"
+                  value={newVenue.district}
+                  onChange={e => setNewVenue(v => ({ ...v, district: e.target.value }))}
+                  className="input-field"
+                />
+              </div>
               <button
                 onClick={geocodeAddress}
                 disabled={!newVenue.name.trim() || geocoding}
-                className="w-full px-4 py-2 rounded-xl bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] text-sm font-medium hover:bg-[var(--color-surface-hover)] disabled:opacity-50"
+                className="btn btn-secondary btn-full"
               >
                 {geocoding ? 'Определяем координаты...' : '📍 Определить координаты по адресу'}
               </button>
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[var(--color-divider)]">
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-divider)' }}>
                 <div>
-                  <label className="block text-xs text-[var(--color-text-tertiary)] mb-1">Широта (lat)</label>
+                  <label className="label">Широта (lat)</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -437,7 +448,7 @@ export function ModerationTab() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-[var(--color-text-tertiary)] mb-1">Долгота (lng)</label>
+                  <label className="label">Долгота (lng)</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -456,13 +467,13 @@ export function ModerationTab() {
                     setVenueCoords({ lat, lng });
                   }
                 }}
-                className="w-full px-4 py-2 rounded-xl bg-[var(--color-surface-secondary)] text-[var(--color-text-secondary)] text-sm font-medium hover:bg-[var(--color-surface-hover)]"
+                className="btn btn-secondary btn-full"
                 disabled={!manualCoords.lat || !manualCoords.lng}
               >
                 Использовать введённые координаты
               </button>
               {venueCoords && (
-                <div className="text-sm text-[var(--color-text-secondary)]">
+                <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   Координаты: {venueCoords.lat.toFixed(5)}, {venueCoords.lng.toFixed(5)}
                   <div className="mt-2">
                     <YandexMap lat={venueCoords.lat} lng={venueCoords.lng} height={200} />
@@ -472,7 +483,7 @@ export function ModerationTab() {
               <button
                 onClick={saveVenue}
                 disabled={!venueCoords || !newVenue.name.trim()}
-                className="btn btn-brand-gradient btn-full"
+                className="btn btn-primary btn-full"
               >
                 Сохранить
               </button>
@@ -482,7 +493,7 @@ export function ModerationTab() {
           {venuesLoading ? (
             <div className="flex items-center justify-center py-8">Загрузка...</div>
           ) : venues.length === 0 ? (
-            <div className="text-center py-8 text-[var(--color-text-tertiary)]">
+            <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
               <p className="font-medium">Мест пока нет</p>
               <p className="text-sm mt-1">Добавьте первое место для игры</p>
             </div>
@@ -491,16 +502,16 @@ export function ModerationTab() {
               <div key={v.id} className="card p-4 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{v.name}</p>
-                  <p className="text-sm text-[var(--color-text-tertiary)]">{v.city}{v.district ? ` · ${v.district}` : ''}</p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>{v.city}{v.district ? ` · ${v.district}` : ''}</p>
                   {(v.latitude !== 0 || v.longitude !== 0) && (
-                    <p className="text-xs text-[var(--color-text-tertiary)]/70 mt-0.5 font-mono">
+                    <p className="text-xs mt-0.5 font-mono" style={{ color: 'var(--color-text-tertiary)', opacity: 0.7 }}>
                       {v.latitude?.toFixed(5)}, {v.longitude?.toFixed(5)}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={() => deleteVenue(v.id)}
-                  className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
+                  className="btn btn-danger btn-sm flex-shrink-0"
                 >
                   Удалить
                 </button>
@@ -514,13 +525,13 @@ export function ModerationTab() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+              <span className="w-1.5 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
               Обращения
             </h3>
             {supportChatsLoading ? (
               <div className="flex items-center justify-center py-8">Загрузка...</div>
             ) : supportChats.length === 0 ? (
-              <div className="card p-6 text-center text-[var(--color-text-tertiary)]">
+              <div className="card p-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
                 <p className="font-medium">Обращений пока нет</p>
               </div>
             ) : (
@@ -530,18 +541,18 @@ export function ModerationTab() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold truncate">{c.userName}</p>
-                        {c.userCity && <span className="text-sm text-[var(--color-text-tertiary)]">· {c.userCity}</span>}
+                        {c.userCity && <span className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>· {c.userCity}</span>}
                       </div>
                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                         <span className={`badge shrink-0 ${c.status === 'closed' ? 'badge-gray' : c.status === 'waiting' ? 'badge-yellow' : 'badge-blue'}`}>
                           {supportStatusNames[c.status] || c.status}
                         </span>
                         {c.assignedStaffName && (
-                          <span className="text-xs text-[var(--color-text-tertiary)]">Оператор: {c.assignedStaffName}</span>
+                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Оператор: {c.assignedStaffName}</span>
                         )}
                       </div>
                       {c.lastMessage && (
-                        <p className="text-sm text-[var(--color-text-tertiary)] truncate mt-1">{c.lastMessage}</p>
+                        <p className="text-sm truncate mt-1" style={{ color: 'var(--color-text-tertiary)' }}>{c.lastMessage}</p>
                       )}
                     </div>
                     <button
@@ -558,14 +569,14 @@ export function ModerationTab() {
 
           <div>
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <span className="w-1.5 h-4 rounded-full brand-gradient" aria-hidden="true" />
+              <span className="w-1.5 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
               Агенты поддержки
             </h3>
-            <p className="text-sm text-[var(--color-text-tertiary)] mb-3">
+            <p className="text-sm mb-3" style={{ color: 'var(--color-text-tertiary)' }}>
               Пользователи с ролью «Поддержка». Обращения открываются выше.
             </p>
             {users.filter(u => u.role === 'support').length === 0 ? (
-              <div className="text-center py-6 text-[var(--color-text-tertiary)]">
+              <div className="text-center py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 <p className="font-medium">Агентов поддержки пока нет</p>
                 <p className="text-sm mt-1">Назначьте роль «Поддержка» во вкладке «Пользователи»</p>
               </div>
@@ -573,18 +584,18 @@ export function ModerationTab() {
               users.filter(u => u.role === 'support').map(user => (
                 <div key={user.uid} className="card p-4 flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-[var(--color-brand-light)] flex items-center justify-center text-[var(--color-brand)] font-bold ring-2 ring-[var(--color-brand)]/20">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
                       {user.displayName[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{user.displayName}</p>
-                      <p className="text-sm text-[var(--color-text-tertiary)] truncate">{user.email || 'email не указан'}</p>
-                      {user.blocked && <p className="text-xs text-[var(--color-red-light)] font-medium mt-1">🚫 Заблокирован</p>}
+                      <p className="text-sm truncate" style={{ color: 'var(--color-text-tertiary)' }}>{user.email || 'email не указан'}</p>
+                      {user.blocked && <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-negative)' }}>🚫 Заблокирован</p>}
                     </div>
                   </div>
                   <button
                     onClick={() => changeRole(user.uid, 'user')}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-[var(--color-red)]/15 text-[var(--color-red-light)] font-medium flex-shrink-0"
+                    className="btn btn-danger btn-sm flex-shrink-0"
                   >
                     Снять роль
                   </button>

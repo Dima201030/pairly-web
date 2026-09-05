@@ -56,7 +56,7 @@ export function TournamentsTab() {
           registrationDeadline: data.registrationDeadline?.toDate?.(),
         } as Tournament;
       });
-      
+
       setTournaments(docs);
       setLoading(false);
     });
@@ -93,7 +93,7 @@ export function TournamentsTab() {
         status: 'open',
         createdAt: Timestamp.now(),
       });
-      
+
       showToast('Турнир создан!', 'success');
       setShowCreate(false);
       setForm({
@@ -113,8 +113,6 @@ export function TournamentsTab() {
 
     setJoiningId(tournament.id);
     try {
-      // Транзакция: проверка лимита участников выполняется атомарно с записью,
-      // чтобы не допустить переполнения турнира при одновременных записях.
       await runTransaction(db, async (transaction) => {
         const snap = await transaction.get(tournamentRef);
         if (!snap.exists()) throw new Error('tournament_not_found');
@@ -185,117 +183,89 @@ export function TournamentsTab() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow brand-gradient-text text-2xl font-bold">Загрузка турниров...</div>
+        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>Загрузка турниров...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4">
-      <div className="flex items-end justify-between mb-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="brand-gradient-text text-3xl font-extrabold tracking-tight">Турниры</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-tertiary)]">Соревнования по вашим любимым видам спорта</p>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Турниры</h1>
+          <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Соревнования по вашим любимым видам спорта</p>
         </div>
         {isStaff && (
           <button
             ref={createBtnRef}
             onClick={() => setShowCreate(true)}
-            className="btn btn-brand-gradient press-scale"
+            className="btn btn-primary press-scale"
           >
-            + Создать турнир
+            + Создать
           </button>
         )}
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true" aria-labelledby="tournaments-modal-title" ref={modalRef}>
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
-            <h2 id="tournaments-modal-title" className="brand-gradient-text text-xl font-bold mb-4">Новый турнир</h2>
-            <form onSubmit={createTournament} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Название турнира *"
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                className="input-field"
-                required
-              />
-              <select
-                value={form.sport}
-                onChange={e => setForm(f => ({ ...f, sport: e.target.value as Sport }))}
-                className="input-field"
-              >
-                {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
-                  <option key={s} value={s}>{sportNames[s]}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Город *"
-                value={form.city}
-                onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                className="input-field"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Клуб *"
-                value={form.venue}
-                onChange={e => setForm(f => ({ ...f, venue: e.target.value }))}
-                className="input-field"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Район"
-                value={form.district}
-                onChange={e => setForm(f => ({ ...f, district: e.target.value }))}
-                className="input-field"
-              />
-              <input
-                type="datetime-local"
-                value={form.startDate.toISOString().slice(0, 16)}
-                onChange={e => setForm(f => ({ ...f, startDate: new Date(e.target.value) }))}
-                className="input-field"
-              />
-              <input
-                type="datetime-local"
-                value={form.regDeadline.toISOString().slice(0, 16)}
-                onChange={e => setForm(f => ({ ...f, regDeadline: new Date(e.target.value) }))}
-                className="input-field"
-              />
-              <select
-                value={form.level}
-                onChange={e => setForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
-                className="input-field"
-              >
-                {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
-                  <option key={l} value={l}>{levelNames[l]}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                min="4"
-                max="128"
-                placeholder="Макс. участников"
-                value={form.maxParticipants}
-                onChange={e => setForm(f => ({ ...f, maxParticipants: parseInt(e.target.value) || 16 }))}
-                className="input-field"
-              />
-              <textarea
-                placeholder="Описание"
-                value={form.note}
-                onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
-                rows={2}
-                className="input-field"
-              />
-              <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary flex-1">
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]" style={{ background: 'rgba(0,0,0,0.6)' }} role="dialog" aria-modal="true" aria-labelledby="tournaments-modal-title" ref={modalRef}>
+          <div className="card-elevated max-w-md w-full max-h-[90vh] overflow-y-auto p-5 relative" style={{ background: 'var(--color-surface)' }}>
+            <h2 id="tournaments-modal-title" className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Новый турнир</h2>
+            <form onSubmit={createTournament} className="space-y-3">
+              <div>
+                <label className="label" htmlFor="t-title">Название</label>
+                <input id="t-title" type="text" placeholder="Название турнира" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className="input-field" required />
+              </div>
+              <div>
+                <label className="label" htmlFor="t-sport">Спорт</label>
+                <select id="t-sport" value={form.sport} onChange={e => setForm(f => ({ ...f, sport: e.target.value as Sport }))} className="input-field">
+                  {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
+                    <option key={s} value={s}>{sportNames[s]}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label" htmlFor="t-city">Город</label>
+                <input id="t-city" type="text" placeholder="Город" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="input-field" required />
+              </div>
+              <div>
+                <label className="label" htmlFor="t-venue">Клуб</label>
+                <input id="t-venue" type="text" placeholder="Клуб" value={form.venue} onChange={e => setForm(f => ({ ...f, venue: e.target.value }))} className="input-field" required />
+              </div>
+              <div>
+                <label className="label" htmlFor="t-district">Район</label>
+                <input id="t-district" type="text" placeholder="Район" value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} className="input-field" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label" htmlFor="t-start">Дата начала</label>
+                  <input id="t-start" type="datetime-local" value={form.startDate.toISOString().slice(0, 16)} onChange={e => setForm(f => ({ ...f, startDate: new Date(e.target.value) }))} className="input-field" />
+                </div>
+                <div>
+                  <label className="label" htmlFor="t-deadline">Рег. до</label>
+                  <input id="t-deadline" type="datetime-local" value={form.regDeadline.toISOString().slice(0, 16)} onChange={e => setForm(f => ({ ...f, regDeadline: new Date(e.target.value) }))} className="input-field" />
+                </div>
+              </div>
+              <div>
+                <label className="label" htmlFor="t-level">Уровень</label>
+                <select id="t-level" value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value as SkillLevel }))} className="input-field">
+                  {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
+                    <option key={l} value={l}>{levelNames[l]}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label" htmlFor="t-max">Макс. участников</label>
+                <input id="t-max" type="number" min="4" max="128" value={form.maxParticipants} onChange={e => setForm(f => ({ ...f, maxParticipants: parseInt(e.target.value) || 16 }))} className="input-field" />
+              </div>
+              <div>
+                <label className="label" htmlFor="t-note">Описание</label>
+                <textarea id="t-note" placeholder="Описание" value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} rows={2} className="input-field resize-none" />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button type="button" onClick={() => setShowCreate(false)} className="btn btn-secondary flex-1">
                   Отмена
                 </button>
-                <button type="submit" className="btn-primary flex-1">
+                <button type="submit" className="btn btn-primary flex-1">
                   Создать
                 </button>
               </div>
@@ -319,73 +289,65 @@ export function TournamentsTab() {
               ? Math.max(0, Math.min(100, Math.round((t.participants.length / t.maxParticipants) * 100)))
               : 0;
             return (
-            <article key={t.id} className={`card p-4 animate-in ${isJoined ? 'border-[var(--color-brand)]/50' : 'card-interactive'}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem" onClick={() => setSelectedTournament(t)}>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border"
+            <article key={t.id} className={`card-interactive p-4 animate-in ${isJoined ? 'border-[var(--color-accent)]/30' : ''}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem" onClick={() => setSelectedTournament(t)}>
+              <div className="flex gap-3">
+                <div
+                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
                   style={{
-                    backgroundColor: `${sportColor}14`,
-                    borderColor: `${sportColor}40`,
-                    boxShadow: `0 4px 16px -6px ${sportColor}55`,
-                  }}>
+                    backgroundColor: `${sportColor}18`,
+                    border: `1px solid ${sportColor}30`,
+                  }}
+                >
                   <span aria-hidden="true">{sportIcons[t.sport]}</span>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                    <h3 className="font-semibold text-lg truncate">{t.title}</h3>
+                  <div className="flex items-start justify-between gap-2 mb-0.5">
+                    <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>{t.title}</h3>
                     <span className={`badge shrink-0 ${t.status === 'open' ? 'badge-green' : t.status === 'finished' ? 'badge-gray' : 'badge-red'}`}>
                       {tournamentStatusNames[t.status] || t.status}
                     </span>
                   </div>
-                  <p className="text-sm text-[var(--color-text-secondary)] mb-2">{t.venue}, {t.city} · {t.district}</p>
-
-                  <div className="flex flex-wrap items-center gap-3 text-sm mb-2">
-                    <span className="flex items-center gap-1 text-[var(--color-text-secondary)]">
-                      <span aria-hidden="true">{sportIcons[t.sport]}</span>
-                      {sportNames[t.sport]}
-                    </span>
-                    <span className="badge badge-gray">
-                      {levelNames[t.level]}
-                    </span>
-                    <span className="text-[var(--color-text-secondary)] flex items-center gap-1">
-                      <span aria-hidden="true">👥</span>
-                      {t.participants.length}/{t.maxParticipants}
-                    </span>
-                  </div>
-
-                  {isJoined && (
-                    <span className="pill brand-gradient text-xs text-[var(--color-text-on-brand)]">
-                      ✓ Вы участвуете
-                    </span>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-text-tertiary)] mt-2">
-                    <span className="flex items-center gap-1">
-                      <span aria-hidden="true">📅</span>
-                      {formatDate(t.startDate)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span aria-hidden="true">⏰</span>
-                      Рег. до {formatDate(t.registrationDeadline || t.startDate)}
-                    </span>
-                  </div>
-
-                  {t.note && <p className="mt-2 text-sm text-[var(--color-text-secondary)] line-clamp-2">{t.note}</p>}
-
-                  <div className="h-1.5 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden mt-3">
-                    <div className="h-full brand-gradient transition-all duration-500" style={{ width: `${spotsPct}%` }} />
-                  </div>
+                  <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{t.venue}, {t.city}</p>
                 </div>
               </div>
 
-              <div className="flex justify-end mt-3 border-t border-[var(--color-divider)] pt-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs mt-2">
+                <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  <span aria-hidden="true">{sportIcons[t.sport]}</span>
+                  {sportNames[t.sport]}
+                </span>
+                <span className="badge badge-gray">{levelNames[t.level]}</span>
+                <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  <span aria-hidden="true">👥</span>
+                  {t.participants.length}/{t.maxParticipants}
+                </span>
+              </div>
+
+              {isJoined && (
+                <div className="pill self-start mt-2" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
+                  ✓ Вы участвуете
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
+                <span>📅 {formatDate(t.startDate)}</span>
+              </div>
+
+              {t.note && <p className="mt-2 text-xs line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>{t.note}</p>}
+
+              <div className="h-1 rounded-full overflow-hidden mt-3" style={{ background: 'var(--color-surface-hover)' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${spotsPct}%`, background: 'var(--color-accent)' }} />
+              </div>
+
+              <div className="flex justify-end mt-3 pt-2 border-t border-[var(--color-divider)]">
                 {isJoined ? (
                   <button
                     onClick={(e) => { e.stopPropagation(); joinTournament(t, true); }}
                     disabled={joiningId === t.id}
                     className="btn btn-outline btn-sm"
                   >
-                    {joiningId === t.id ? 'Отмена...' : 'Покинуть'}
+                    {joiningId === t.id ? '...' : 'Выйти'}
                   </button>
                 ) : t.status === 'open' && t.participants.length < t.maxParticipants ? (
                   <button
@@ -393,7 +355,7 @@ export function TournamentsTab() {
                     disabled={joiningId === t.id}
                     className="btn btn-primary btn-sm"
                   >
-                    {joiningId === t.id ? 'Запись...' : 'Записаться'}
+                    {joiningId === t.id ? '...' : 'Записаться'}
                   </button>
                 ) : (
                   <button className="btn btn-secondary btn-sm" disabled>Мест нет</button>

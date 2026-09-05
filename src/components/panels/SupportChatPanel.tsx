@@ -30,7 +30,6 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
   const [ready, setReady] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Определяем (или создаём) чат. Для персонала чат передаётся по id.
   useEffect(() => {
     if (!profile) return;
 
@@ -99,10 +98,8 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
         unsubPromise.then(unsub => unsub?.());
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, mode, chatId]);
 
-  // Подписка на сообщения после того, как чат известен.
   useEffect(() => {
     if (!chat) return;
     const unsub = onSnapshot(
@@ -186,7 +183,6 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
   const closeChat = async () => {
     if (!chat) return;
     try {
-      // Пользователь может обновить в чате только поле status (правила).
       await updateDoc(doc(db, 'supportChats', chat.id), { status: 'closed' });
       showToast('Чат закрыт', 'success');
     } catch {
@@ -197,7 +193,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
   if (!ready) {
     return (
       <Modal title="Поддержка" onClose={onClose} maxWidth="max-w-xl">
-        <div className="flex items-center justify-center py-10 text-[var(--color-text-tertiary)]">
+        <div className="flex items-center justify-center py-10" style={{ color: 'var(--color-text-tertiary)' }}>
           Открываем чат...
         </div>
       </Modal>
@@ -209,33 +205,33 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
   return (
     <Modal title={mode === 'user' ? 'Поддержка' : chat ? `Чат: ${chat.userName}` : 'Поддержка'} onClose={onClose} maxWidth="max-w-xl">
       {!chat ? (
-        <div className="py-10 text-center text-[var(--color-text-tertiary)]">
+        <div className="py-10 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
           Чат не найден
         </div>
       ) : (
         <div className="space-y-4">
           {mode === 'staff' && (
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-semibold">{chat.userName}</span>
-              {chat.userCity && <span className="text-[var(--color-text-tertiary)]">· {chat.userCity}</span>}
+              <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{chat.userName}</span>
+              {chat.userCity && <span style={{ color: 'var(--color-text-tertiary)' }}>· {chat.userCity}</span>}
               <span className={`badge shrink-0 ${chat.status === 'closed' ? 'badge-gray' : chat.status === 'waiting' ? 'badge-yellow' : 'badge-blue'}`}>
                 {supportStatusNames[chat.status] || chat.status}
               </span>
               {chat.assignedStaffName && (
-                <span className="text-xs text-[var(--color-text-tertiary)]">· Оператор: {chat.assignedStaffName}</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>· Оператор: {chat.assignedStaffName}</span>
               )}
             </div>
           )}
 
           {mode === 'user' && chat.status !== 'closed' && chat.assignedStaffName && (
-            <p className="text-sm text-[var(--color-text-tertiary)]">
-              Ваш оператор: <span className="text-[var(--color-brand-green)] font-medium">{chat.assignedStaffName}</span>
+            <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+              Ваш оператор: <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{chat.assignedStaffName}</span>
             </p>
           )}
 
-          <div className="h-64 overflow-y-auto space-y-2.5 p-3 rounded-xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+          <div className="h-64 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             {messages.length === 0 ? (
-              <p className="text-center text-sm text-[var(--color-text-tertiary)] py-6">
+              <p className="text-center text-sm py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 {mode === 'user'
                   ? 'Опишите вашу проблему — оператор скоро ответит'
                   : 'Пока нет сообщений'}
@@ -248,16 +244,20 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
                   <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
                       isMine
-                        ? 'brand-gradient text-[var(--color-text-on-brand)] rounded-br-md'
+                        ? 'rounded-br-md'
                         : isSystem
-                          ? 'bg-[var(--color-surface-secondary)] border border-dashed border-[var(--color-border)] text-[var(--color-text-tertiary)] rounded-bl-md'
-                          : 'bg-[var(--color-surface-secondary)] border border-[var(--color-divider)] rounded-bl-md'
-                    }`}>
+                          ? 'rounded-bl-md'
+                          : 'rounded-bl-md'
+                    }`} style={{
+                      background: isMine ? 'var(--color-accent)' : 'var(--color-surface)',
+                      color: isMine ? 'var(--color-accent-on)' : 'var(--color-text-primary)',
+                      border: isMine ? 'none' : isSystem ? '1px dashed var(--color-border)' : '1px solid var(--color-divider)',
+                    }}>
                       {!isMine && !isSystem && (
-                        <p className="text-xs font-semibold mb-0.5 text-[var(--color-brand-green)]">{m.authorName}</p>
+                        <p className="text-xs font-semibold mb-0.5" style={{ color: 'var(--color-text-primary)' }}>{m.authorName}</p>
                       )}
                       <p className="break-words whitespace-pre-wrap">{m.text}</p>
-                      <p className={`text-[10px] mt-1 ${isMine ? 'opacity-80' : 'text-[var(--color-text-tertiary)]'}`}>
+                      <p className={`text-[10px] mt-1 ${isMine ? 'opacity-80' : ''}`} style={!isMine ? { color: 'var(--color-text-tertiary)' } : undefined}>
                         {new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(m.sentAt)}
                       </p>
                     </div>
@@ -278,14 +278,14 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
                 maxLength={1000}
                 aria-label="Сообщение"
               />
-              <button type="submit" disabled={sending || !text.trim()} className="btn btn-brand-gradient shrink-0">
+              <button type="submit" disabled={sending || !text.trim()} className="btn btn-primary btn-sm shrink-0">
                 {sending ? '...' : '➤'}
               </button>
             </form>
           )}
 
           {mode === 'staff' && isStaff && (
-            <div className="flex flex-wrap gap-2 pt-1 border-t border-[var(--color-divider)]">
+            <div className="flex flex-wrap gap-2 pt-1" style={{ borderTop: '1px solid var(--color-divider)' }}>
               {!chat.assignedStaffID && (
                 <button onClick={assignToMe} className="btn btn-primary btn-sm">
                   Взять в работу
@@ -303,7 +303,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
           )}
 
           {mode === 'user' && chat.status !== 'closed' && (
-            <div className="flex gap-2 pt-1 border-t border-[var(--color-divider)]">
+            <div className="flex gap-2 pt-1" style={{ borderTop: '1px solid var(--color-divider)' }}>
               <button onClick={closeChat} className="btn btn-outline btn-sm">
                 Закрыть чат
               </button>

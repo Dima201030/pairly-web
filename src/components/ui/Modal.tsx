@@ -9,11 +9,6 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-/**
- * Переиспользуемое модальное окно: на мобиле — нижний лист на весь экран,
- * на десктопе — центрированная карточка. Escape / клик по фону закрывают,
- * фокус замыкается внутри окна.
- */
 export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +46,8 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-slide-up"
+      className="fixed inset-0 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-slide-up"
+      style={{ background: 'rgba(0,0,0,0.7)' }}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -62,14 +58,17 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`bg-[var(--color-surface)] border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-2xl sm:rounded-2xl w-full ${maxWidth} max-h-[94vh] overflow-y-auto relative outline-none animate-slide-up`}
+        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[94vh] overflow-y-auto relative outline-none animate-slide-up`}
+        style={{ background: 'var(--color-surface)' }}
       >
-        <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-4 bg-[var(--color-surface)]/90 backdrop-blur border-b border-[var(--color-divider)]">
+        <div
+          className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-4 border-b border-[var(--color-border)]"
+          style={{ background: 'var(--color-surface)', backdropFilter: 'blur(10px)' }}
+        >
           <h2 className="font-bold text-lg truncate">{title}</h2>
           <button
             onClick={onClose}
-            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] transition-colors"
+            className="btn btn-ghost btn-sm"
             aria-label="Закрыть"
           >
             ✕

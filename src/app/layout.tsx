@@ -1,9 +1,14 @@
-import { Inter } from 'next/font/google';
+import { Instrument_Sans } from 'next/font/google';
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
 
-const inter = Inter({ subsets: ['latin', 'cyrillic'] });
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-instrument',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Pairly — Найди игру',
@@ -20,7 +25,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
+      <body className={`${instrumentSans.variable} font-[family-name:var(--font-instrument)]`}>
+        <div className="mesh-bg" aria-hidden="true" />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

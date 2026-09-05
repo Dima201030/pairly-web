@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -27,7 +27,7 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     setSuccess('');
-    
+
     try {
       if (isLogin) {
         await login(form.email, form.password);
@@ -61,123 +61,143 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen pairly-bg">
-      <div className="relative min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
-      {/* Брендовое свечение */}
-      <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl brand-gradient" aria-hidden="true" />
-
-      <div className="w-full max-w-md relative">
+    <div className="min-h-screen flex items-center justify-center p-4 pairly-bg">
+      <div className="w-full max-w-sm relative">
         <div className="text-center mb-8">
           <Image
             src="/logo-white.png"
             alt="Pairly"
             width={1024}
             height={1024}
-            className="h-20 w-auto mx-auto mb-3"
+            className="h-16 w-auto mx-auto mb-4"
           />
-          <p className="mt-2 text-[var(--color-text-secondary)]">Находи игры, организуй матчи, играй вместе</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+            Находи игры, организуй матчи, играй вместе
+          </p>
         </div>
 
-        <div className="card p-8 relative overflow-hidden rounded-2xl">
-          <div className="absolute top-0 left-0 right-0 h-1 brand-gradient" aria-hidden="true" />
-
-          <div className="flex gap-2 p-1 rounded-xl bg-[var(--color-surface-secondary)] mb-6">
+        <div className="card p-6">
+          <div className="flex gap-1 p-1 rounded-lg mb-6" style={{ background: 'var(--color-surface)' }}>
             <button
               type="button"
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${isLogin ? 'brand-gradient text-[var(--color-text-on-brand)]' : 'text-[var(--color-text-secondary)]'}`}
+              className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${
+                isLogin
+                  ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
+                  : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
+              }`}
             >
               Вход
             </button>
             <button
               type="button"
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${!isLogin ? 'brand-gradient text-[var(--color-text-on-brand)]' : 'text-[var(--color-text-secondary)]'}`}
+              className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${
+                !isLogin
+                  ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
+                  : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
+              }`}
             >
               Регистрация
             </button>
           </div>
 
-          <h2 className="text-xl font-bold text-center mb-5">
+          <h2 className="text-xl font-bold text-center mb-5" style={{ color: 'var(--color-text-primary)' }}>
             {isLogin ? 'С возвращением!' : 'Создайте аккаунт'}
           </h2>
-        
-        {error && (
-          <div className="mb-4 p-3 bg-[var(--color-red)]/15 text-[var(--color-red-light)] rounded-lg text-sm">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-3 p-3 bg-[var(--color-green)]/15 text-[var(--color-green-light)] rounded-lg text-sm">
-            {success}
-          </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <input
-              type="text"
-              placeholder="Имя"
-              value={form.displayName}
-              onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))}
-              className="input-field"
-              required={!isLogin}
-              autoComplete="name"
-            />
+          {error && (
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'var(--color-negative-subtle)', color: 'var(--color-negative)' }}>
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: 'var(--color-positive-subtle)', color: 'var(--color-positive)' }}>
+              {success}
+            </div>
           )}
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            className="input-field"
-            required
-            autoComplete="email"
-          />
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {!isLogin && (
+              <div>
+                <label className="label" htmlFor="displayName">Имя</label>
+                <input
+                  id="displayName"
+                  type="text"
+                  placeholder="Ваше имя"
+                  value={form.displayName}
+                  onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))}
+                  className="input-field"
+                  required={!isLogin}
+                  autoComplete="name"
+                />
+              </div>
+            )}
 
-          <input
-            type="password"
-            placeholder="Пароль (минимум 6 символов)"
-            value={form.password}
-            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-            className="input-field"
-            required
-            autoComplete={isLogin ? 'current-password' : 'new-password'}
-          />
+            <div>
+              <label className="label" htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                className="input-field"
+                required
+                autoComplete="email"
+              />
+            </div>
 
-          {!isLogin && (
-            <select
-              value={form.sport}
-              onChange={e => setForm(f => ({ ...f, sport: e.target.value as Sport }))}
-              className="input-field"
+            <div>
+              <label className="label" htmlFor="password">Пароль</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Минимум 6 символов"
+                value={form.password}
+                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                className="input-field"
+                required
+                autoComplete={isLogin ? 'current-password' : 'new-password'}
+              />
+            </div>
+
+            {!isLogin && (
+              <div>
+                <label className="label" htmlFor="sport">Вид спорта</label>
+                <select
+                  id="sport"
+                  value={form.sport}
+                  onChange={e => setForm(f => ({ ...f, sport: e.target.value as Sport }))}
+                  className="input-field"
+                >
+                  {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
+                    <option key={s} value={s}>{sportNames[s]}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary btn-full py-3 mt-2"
             >
-              {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(s => (
-                <option key={s} value={s}>{sportNames[s]}</option>
-              ))}
-            </select>
-          )}
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-3"
-          >
-            {loading ? 'Подождите...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
-          </button>
-        </form>
+              {loading ? 'Подождите...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
+            </button>
+          </form>
 
-        <p className="text-center text-sm text-[var(--color-text-tertiary)] mt-4">
-          {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-[var(--color-brand)] font-medium hover:underline"
-          >
-            {isLogin ? 'Зарегистрироваться' : 'Войти'}
-          </button>
-        </p>
+          <p className="text-center text-sm mt-5" style={{ color: 'var(--color-text-tertiary)' }}>
+            {isLogin ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="font-semibold ml-1 hover:underline"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              {isLogin ? 'Зарегистрироваться' : 'Войти'}
+            </button>
+          </p>
         </div>
-      </div>
       </div>
     </div>
   );

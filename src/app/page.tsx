@@ -34,20 +34,25 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pairly-bg flex items-center justify-center">
-        <Image
-          src="/logo-white.png"
-          alt="Pairly"
-          width={1024}
-          height={1024}
-          className="h-16 w-auto animate-pulse-slow"
-        />
+      <div className="min-h-screen flex items-center justify-center pairly-bg">
+        <div className="flex flex-col items-center gap-4">
+          <Image
+            src="/logo-white.png"
+            alt="Pairly"
+            width={1024}
+            height={1024}
+            className="h-14 w-auto animate-pulse-slow"
+          />
+          <div className="w-32 h-1 rounded-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+            <div className="h-full animate-shimmer" style={{ width: '60%' }} />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!user) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   const filteredTabs = tabConfig.filter(t => {
@@ -63,37 +68,50 @@ export default function HomePage() {
     <div className="min-h-screen pairly-bg">
       <div className="relative min-h-screen flex flex-col">
         <ToastProvider>
-          <header className="z-40 bg-[var(--color-surface)]/85 backdrop-blur border-b border-[var(--color-border)]">
-            <div className="flex items-center justify-between gap-3 px-4 h-16">
-              <div className="flex items-center gap-3 min-w-0">
+          <header
+            className="z-[var(--z-header)] glass border-b border-[var(--color-border)]"
+            style={{ position: 'sticky', top: 0 }}
+          >
+            <div className="flex items-center justify-between gap-3 px-4 h-14">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <Image
                   src="/logo-white.png"
                   alt="Pairly"
                   width={1024}
                   height={1024}
-                  className="h-10 w-auto shrink-0"
+                  className="h-8 w-auto shrink-0"
                 />
-                <div className="hidden sm:block min-w-0">
-                  <p className="font-bold leading-tight truncate">Pairly</p>
-                  <p className="text-xs text-[var(--color-text-tertiary)] truncate">Найди игру</p>
-                </div>
+                <span className="hidden sm:block text-sm font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+                  Pairly
+                </span>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <span className="hidden md:flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
-                  <span className="w-8 h-8 rounded-full bg-[var(--color-brand)]/15 text-[var(--color-brand)] font-bold flex items-center justify-center">
-                    {profile?.displayName?.[0]?.toUpperCase() ?? '?'}
-                  </span>
-                  <span className="max-w-[140px] truncate">{profile?.displayName}</span>
-                </span>
-                <button onClick={handleLogout} className="btn btn-ghost btn-sm" title="Выйти">
+                {profile && (
+                  <div className="hidden md:flex items-center gap-2">
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}
+                    >
+                      {profile.displayName?.[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <span className="text-sm max-w-[120px] truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      {profile.displayName}
+                    </span>
+                  </div>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-ghost btn-sm"
+                  title="Выйти"
+                >
                   Выйти
                 </button>
               </div>
             </div>
 
             <nav
-              className="hidden md:flex gap-1 px-4 pb-3 overflow-x-auto scrollbar-hide"
+              className="hidden md:flex gap-1 px-4 pb-2 overflow-x-auto scrollbar-hide"
               role="tablist"
               aria-label="Разделы приложения"
             >
@@ -103,10 +121,10 @@ export default function HomePage() {
                   onClick={() => setActiveTab(tab.id)}
                   role="tab"
                   aria-selected={activeTab === tab.id}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                     activeTab === tab.id
-                      ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-md'
-                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]'
+                      ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
+                      : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]'
                   }`}
                 >
                   {tab.label}
@@ -116,8 +134,6 @@ export default function HomePage() {
           </header>
 
           <main className="flex-1 overflow-hidden">
-            {/* Вкладки не размаунтируются при переключении (hidden вместо unmount) —
-                данные и live-подписки продолжают жить в фоне, нет мигания лоадера. */}
             <div className={activeTab === 'matches' ? 'h-full' : 'hidden'}>
               <MatchesTab onNavigate={(tab) => setActiveTab(tab as Tab)} />
             </div>
@@ -138,24 +154,25 @@ export default function HomePage() {
           </main>
 
           <nav
-            className="fixed bottom-0 left-0 right-0 w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] safe-bottom z-50 md:hidden"
+            className="fixed bottom-0 left-0 right-0 w-full border-t border-[var(--color-border)] safe-bottom z-[var(--z-header)] md:hidden glass"
             role="navigation"
             aria-label="Основная навигация"
           >
-            <div className="flex gap-1 px-2 py-2" role="tablist" aria-label="Разделы приложения">
+            <div className="flex gap-0.5 px-1 py-1.5" role="tablist" aria-label="Разделы приложения">
               {filteredTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex flex-1 flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200
-                    ${activeTab === tab.id 
-                      ? 'brand-gradient text-[var(--color-text-on-brand)] shadow-lg' 
-                      : 'text-[var(--color-text-tertiary)]'}`}
+                  className={`flex flex-1 flex-col items-center gap-0.5 px-2 py-2 rounded-xl transition-all duration-200
+                    ${activeTab === tab.id
+                      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-tertiary)] active:bg-[var(--color-surface-hover)]'
+                    }`}
                   role="tab"
                   aria-selected={activeTab === tab.id}
                 >
-                  <span className="text-2xl" aria-hidden="true">{tab.icon}</span>
-                  <span className="text-xs font-medium">{tab.label}</span>
+                  <span className="text-xl leading-none" aria-hidden="true">{tab.icon}</span>
+                  <span className="text-[10px] font-semibold leading-tight">{tab.label}</span>
                 </button>
               ))}
             </div>
