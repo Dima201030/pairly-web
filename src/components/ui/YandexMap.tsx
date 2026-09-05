@@ -2,9 +2,26 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+interface YmapsMap {
+  destroy(): void;
+  geoObjects: {
+    add(obj: unknown): void;
+  };
+}
+
+interface YmapsPlacemark {
+  new (coords: [number, number], properties?: unknown, options?: unknown): unknown;
+}
+
+interface Ymaps {
+  Map: new (container: HTMLElement, state: unknown, options?: unknown) => YmapsMap;
+  Placemark: YmapsPlacemark;
+  ready(callback: () => void): void;
+}
+
 declare global {
   interface Window {
-    ymaps: any;
+    ymaps?: Ymaps;
     __ymapsLoading?: boolean;
   }
 }
@@ -19,18 +36,14 @@ interface YandexMapProps {
 
 export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }: YandexMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapInstanceRef = useRef<YmapsMap | null>(null);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
-    const container = mapRef.current;
+  const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
-    const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
-    if (!apiKey) {
-      setError(true);
-      return;
-    }
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current || !apiKey) return;
+    const container = mapRef.current;
 
     let destroyed = false;
 
@@ -68,7 +81,7 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
     const onReady = () => {
       if (destroyed) return;
       try {
-        window.ymaps.ready(() => {
+        window.ymaps?.ready(() => {
           if (!destroyed) initMap();
         });
       } catch (e) {
@@ -106,11 +119,11 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
         mapInstanceRef.current = null;
       }
     };
-  }, [lat, lng, zoom]);
+  }, [lat, lng, zoom, apiKey]);
 
   const mapsUrl = `https://yandex.ru/maps/?pt=${lng},${lat}&z=16&ll=${lng},${lat}&spn=0.005,0.005&text=${lat},${lng}`;
 
-  if (error) {
+  if (error || !apiKey) {
     return (
       <div className={`rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
         <a

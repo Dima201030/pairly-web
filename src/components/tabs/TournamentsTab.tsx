@@ -294,8 +294,8 @@ export function TournamentsTab() {
                 <div
                   className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
                   style={{
-                    backgroundColor: `${sportColor}18`,
-                    border: `1px solid ${sportColor}30`,
+                    backgroundColor: `${sportColor}1F`,
+                    border: `1px solid ${sportColor}33`,
                   }}
                 >
                   <span aria-hidden="true">{sportIcons[t.sport]}</span>

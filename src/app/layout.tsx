@@ -1,12 +1,19 @@
-import { Instrument_Sans } from 'next/font/google';
+import { Merriweather, Playfair_Display } from 'next/font/google';
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/AuthContext';
 
-const instrumentSans = Instrument_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-instrument',
+const merriweather = Merriweather({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '700'],
+  variable: '--font-merriweather',
+  display: 'swap',
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['700'],
+  variable: '--font-playfair',
   display: 'swap',
 });
 
@@ -25,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={`${instrumentSans.variable} font-[family-name:var(--font-instrument)]`}>
+      <body className={`${merriweather.variable} ${playfairDisplay.variable} font-[family-name:var(--font-merriweather)]`}>
         <div className="mesh-bg" aria-hidden="true" />
         <AuthProvider>{children}</AuthProvider>
       </body>

@@ -151,7 +151,7 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="pill pill-inactive !py-0.5 text-xs">{match.city}</span>
-          <span className="badge" style={{ backgroundColor: `${sportColor}1c`, color: sportColor }}>
+          <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
             {sportIcons[match.sport]} {sportNames[match.sport]}
           </span>
           <span className="badge badge-gray">{levelNames[match.level]}</span>

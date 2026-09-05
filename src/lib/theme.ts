@@ -1,10 +1,10 @@
 export const sportColors: Record<string, string> = {
-  padel: '#00D4AA',
-  tennis: '#FFD700',
-  badminton: '#FC8181',
-  squash: '#B794F4',
-  football: '#63B3ED',
-  running: '#68D391',
+  padel: '#FFFFFF',
+  tennis: '#CCCCCC',
+  badminton: '#AAAAAA',
+  squash: '#999999',
+  football: '#BBBBBB',
+  running: '#DDDDDD',
 };
 
 export const sportIcons: Record<string, string> = {

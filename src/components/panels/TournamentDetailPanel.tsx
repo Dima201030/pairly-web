@@ -80,7 +80,7 @@ export function TournamentDetailPanel({ tournamentId, initial, onClose }: Tourna
     <Modal title={tournament.title} onClose={onClose} maxWidth="max-w-xl">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="badge shrink-0" style={{ backgroundColor: `${sportColor}1c`, color: sportColor }}>
+          <span className="badge shrink-0" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
             {sportIcons[tournament.sport]} {sportNames[tournament.sport]}
           </span>
           <span className="badge badge-gray">{levelNames[tournament.level]}</span>

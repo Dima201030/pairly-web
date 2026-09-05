@@ -98,7 +98,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
         unsubPromise.then(unsub => unsub?.());
       };
     }
-  }, [profile, mode, chatId]);
+  }, [profile, mode, chatId, showToast]);
 
   useEffect(() => {
     if (!chat) return;

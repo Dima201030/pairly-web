@@ -289,8 +289,8 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
         <div
           className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
           style={{
-            backgroundColor: `${sportColor}18`,
-            border: `1px solid ${sportColor}30`,
+            backgroundColor: `${sportColor}1F`,
+            border: `1px solid ${sportColor}33`,
           }}
         >
           <span aria-hidden="true">{sportIcons[match.sport]}</span>
@@ -318,7 +318,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
           <span aria-hidden="true">⏱️</span>{' '}
           {timeUntil(match.startDate)}
         </span>
-        <span className="badge" style={{ backgroundColor: `${sportColor}18`, color: sportColor }}>
+        <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
           {sportNames[match.sport]}
         </span>
         <span className="badge badge-gray">
