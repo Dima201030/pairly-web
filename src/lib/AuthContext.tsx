@@ -168,17 +168,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user || !profile) return;
     const { Timestamp } = await import('firebase/firestore');
     const updated = { ...profile, ...data };
-    // Свои правки не шлём серверно-контролируемые role/blocked: это и запрещает
-    // правила, и «чинит» старые аккаунты, у которых док так и не создался
-    // (merge-создание с полем role отклоняется правилами).
     const serverFields = new Set(['role', 'blocked']);
     const profileData = Object.fromEntries(
       Object.entries(updated).filter(([key]) => !serverFields.has(key))
     );
+    const createdAt = updated.createdAt instanceof Date
+      ? Timestamp.fromDate(updated.createdAt)
+      : updated.createdAt;
     try {
       await setDoc(doc(db, 'users', user.uid), {
         ...profileData,
-        createdAt: Timestamp.fromDate(updated.createdAt),
+        createdAt,
       }, { merge: true });
       setProfile(updated);
     } catch (err) {
