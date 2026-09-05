@@ -229,7 +229,7 @@ export function ModerationTab() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 max-w-5xl mx-auto animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-3 sm:px-4 space-y-4 max-w-5xl mx-auto animate-in">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Модерация</h1>
@@ -458,7 +458,7 @@ export function ModerationTab() {
               >
                 {geocoding ? 'Определяем координаты...' : 'Определить координаты по адресу'}
               </button>
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-divider)' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-divider)' }}>
                 <div>
                   <label className="label">Широта (lat)</label>
                   <input

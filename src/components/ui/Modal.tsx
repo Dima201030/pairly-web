@@ -58,23 +58,23 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[94vh] overflow-y-auto relative outline-none animate-slide-up`}
+        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[94vh] overflow-y-auto overflow-x-hidden relative outline-none animate-slide-up`}
         style={{ background: 'var(--color-surface)' }}
       >
         <div
-          className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-4 border-b border-[var(--color-border)]"
+          className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 border-b border-[var(--color-border)]"
           style={{ background: 'var(--color-surface)', backdropFilter: 'blur(10px)' }}
         >
-          <h2 className="font-bold text-lg truncate">{title}</h2>
+          <h2 className="font-bold text-base sm:text-lg truncate min-w-0">{title}</h2>
           <button
             onClick={onClose}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-sm shrink-0"
             aria-label="Закрыть"
           >
             ✕
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        <div className="p-3 sm:p-5">{children}</div>
       </div>
     </div>
   );

@@ -61,11 +61,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 pairly-bg">
+    <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 pairly-bg">
       <div className="w-full max-w-sm relative">
         <div className="text-center mb-8">
           <Image
-            src="/logo-white.png"
+            src="/logo-mark.png"
             alt="Pairly"
             width={1024}
             height={1024}

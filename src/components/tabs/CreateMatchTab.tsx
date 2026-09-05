@@ -98,7 +98,7 @@ export function CreateMatchTab() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-6 px-4 pt-5 space-y-4 animate-in max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-6 px-3 sm:px-4 pt-5 space-y-4 animate-in max-w-2xl mx-auto">
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Новая заявка</h1>
         <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Опишите игру — и игроки смогут записаться</p>
@@ -179,7 +179,7 @@ export function CreateMatchTab() {
       </Section>
 
       <Section title="Уровень и места">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="label" htmlFor="level">Уровень</label>
             <select

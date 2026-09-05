@@ -125,10 +125,10 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-3 sm:px-4 pt-4 space-y-5 animate-in max-w-3xl mx-auto">
       <div className="card p-5 relative overflow-hidden">
-        <div className="flex items-center gap-4">
-          <div className="relative w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-bold" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-2xl sm:text-4xl font-bold shrink-0" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
             {profile.displayName[0].toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -155,7 +155,7 @@ export function ProfileTab() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:gap-3">
           <StatCard value={myMatches.length} label="Матчей" />
           <StatCard value={myTournaments.length} label="Турниров" />
         </div>

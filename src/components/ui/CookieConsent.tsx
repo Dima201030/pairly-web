@@ -26,10 +26,10 @@ export function CookieConsent() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[550] p-4 md:p-6 animate-slide-up"
+      className="fixed bottom-0 left-0 right-0 z-[550] p-3 sm:p-4 md:p-6 animate-slide-up"
       style={{ background: 'var(--color-surface-elevated)', borderTop: '1px solid var(--color-border)' }}
     >
-      <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
         <p className="text-sm flex-1" style={{ color: 'var(--color-text-secondary)' }}>
           Мы используем cookie для хранения ваших настроек и авторизации. Без cookie приложение не сможет работать.
         </p>

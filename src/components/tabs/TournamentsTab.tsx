@@ -183,7 +183,7 @@ export function TournamentsTab() {
 
   if (loading) {
     return (
-      <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-3 sm:px-4 space-y-4 animate-in">
         <div className="flex items-end justify-between">
           <div>
             <div className="h-7 w-32 rounded-lg animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
@@ -242,7 +242,7 @@ export function TournamentsTab() {
                 <label className="label" htmlFor="t-district">Район</label>
                 <input id="t-district" type="text" placeholder="Район" value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} className="input-field" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="label" htmlFor="t-start">Дата начала</label>
                   <input id="t-start" type="datetime-local" value={form.startDate.toISOString().slice(0, 16)} onChange={e => setForm(f => ({ ...f, startDate: new Date(e.target.value) }))} className="input-field" />

@@ -201,7 +201,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-3 sm:px-4 space-y-4 animate-in">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Матчи</h1>
@@ -246,7 +246,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void
 
         {activeFilter && (
           <div
-            className="absolute top-full left-0 mt-2 w-80 max-h-[70vh] overflow-y-auto z-50 p-4 space-y-4"
+            className="absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] max-w-80 max-h-[70vh] overflow-y-auto z-50 p-3 sm:p-4 space-y-3 sm:space-y-4"
             style={{
               background: 'var(--color-surface-elevated)',
               borderRadius: 'var(--radius-lg)',

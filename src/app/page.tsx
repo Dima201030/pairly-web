@@ -95,7 +95,7 @@ export default function HomePage() {
         return <ProfileTab />;
       case 'support':
         return (
-          <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-5 px-4 max-w-2xl mx-auto">
+          <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-5 px-3 sm:px-4 max-w-2xl mx-auto">
             <SupportChatPanel mode="user" />
           </div>
         );
