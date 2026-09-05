@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, ReactNode } from 'react';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 
 interface ModalProps {
   title: string;
@@ -12,6 +12,12 @@ interface ModalProps {
 
 export function Modal({ title, onClose, children, maxWidth = 'max-w-lg', panelBg }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(), 200);
+  };
 
   useEffect(() => {
     const prevFocus = document.activeElement as HTMLElement | null;
@@ -19,7 +25,7 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg', panelBg
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleClose();
         return;
       }
       if (e.key !== 'Tab') return;
@@ -47,31 +53,39 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg', panelBg
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-x-hidden animate-slide-up"
-      style={{ background: '#000000' }}
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-x-hidden ${isClosing ? '' : 'animate-slide-up'}`}
+      style={{
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        animation: isClosing ? 'fadeOut 0.2s ease-out forwards' : undefined,
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={title}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleClose();
       }}
     >
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[92vh] overflow-y-auto overflow-x-hidden relative outline-none animate-slide-up`}
-        style={{ background: panelBg || 'var(--color-surface)' }}
+        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[92vh] overflow-y-auto overflow-x-hidden relative outline-none`}
+        style={{
+          background: panelBg || 'var(--color-surface)',
+          animation: isClosing ? 'slideDown 0.2s ease-out forwards' : 'slideUp var(--dur-slow) var(--ease-out)',
+        }}
       >
         <div className="sm:hidden flex justify-center pt-2 pb-1">
           <div className="w-8 h-1 rounded-full" style={{ background: 'var(--color-text-tertiary)' }} />
         </div>
         <div
           className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 border-b border-[var(--color-border)]"
-        style={{ background: panelBg || 'var(--color-surface)' }}
+          style={{ background: panelBg || 'var(--color-surface)' }}
         >
           <h2 className="font-bold text-base sm:text-lg truncate min-w-0">{title}</h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="btn btn-ghost btn-sm shrink-0"
             aria-label="Закрыть"
           >
