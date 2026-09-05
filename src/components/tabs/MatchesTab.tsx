@@ -2,15 +2,17 @@
 
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
-import { sportNames, levelNames, sportIcons, sportColors } from '@/lib/theme';
-import { Match, Sport, SkillLevel, UserProfile } from '@/lib/types';
+import { sportNames, levelNames, sportIcons, sportColors, ntrpLevelNames } from '@/lib/theme';
+import { Match, Sport, SkillLevel, NTRPLevel, UserProfile } from '@/lib/types';
 import { formatDate, timeUntil } from '@/lib/format';
 import { collection, query, where, orderBy, onSnapshot, Timestamp, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { YandexMap } from '@/components/ui/YandexMap';
 import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+
+const NTRP_LEVELS: NTRPLevel[] = ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0'];
 
 export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { profile, isStaff } = useAuth();
@@ -20,9 +22,12 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedSport, setSelectedSport] = useState<Sport | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<SkillLevel | null>(null);
+  const [selectedNtrp, setSelectedNtrp] = useState<NTRPLevel | null>(null);
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [cities, setCities] = useState<string[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -84,16 +89,6 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
     return unsubscribe;
   }, [selectedCity, selectedSport, selectedLevel, profile]);
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
-          Загрузка матчей...
-        </div>
-      </div>
-    );
-  }
-
   const joinMatch = async (match: Match, leave: boolean) => {
     if (!profile) { showToast('Войдите в аккаунт', 'error'); return; }
     const matchRef = doc(db, 'matches', match.id);
@@ -135,13 +130,46 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const filteredMatches = matches.filter(m => {
     if (m.participants.includes(profile?.uid || '')) return true;
     return m.openSpots > 0;
+  }).filter(m => {
+    if (selectedNtrp && m.sport === 'tennis') {
+      return m.hostNTRP != null && Math.floor(m.hostNTRP) === Math.floor(parseFloat(selectedNtrp));
+    }
+    return true;
   });
 
   const cityOptions = cities.length > 0
     ? cities
     : ['Москва', 'СПб', 'Казань', 'Екатеринбург', 'Новосибирск'];
   const sports: Sport[] = ['padel', 'tennis', 'badminton', 'squash', 'football', 'running'];
-  const levels: SkillLevel[] = ['any', 'beginner', 'middle', 'advanced'];
+
+  const activeFilterCount = [selectedCity, selectedSport, selectedLevel || selectedNtrp].filter(Boolean).length;
+
+  const resetFilters = useCallback(() => {
+    setSelectedCity(null);
+    setSelectedSport(null);
+    setSelectedLevel(null);
+    setSelectedNtrp(null);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filtersRef.current && !filtersRef.current.contains(e.target as Node)) {
+        setFiltersOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
+          Загрузка матчей...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
@@ -154,44 +182,185 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
               : `${filteredMatches.length} открытых игр рядом`}
           </p>
         </div>
-        {isStaff && (
-          <span className="pill" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
-            Персонал
-          </span>
+        <div className="flex items-center gap-2">
+          {isStaff && (
+            <span className="pill" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-text-secondary)' }}>
+              Персонал
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="relative" ref={filtersRef}>
+        <button
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="btn btn-secondary btn-sm flex items-center gap-2"
+          aria-expanded={filtersOpen}
+          aria-haspopup="true"
+        >
+          <span aria-hidden="true">☰</span>
+          Фильтры
+          {activeFilterCount > 0 && (
+            <span
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
+              style={{ background: 'var(--color-accent)', color: 'var(--color-accent-on)' }}
+            >
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+
+        {filtersOpen && (
+          <div
+            className="absolute top-full left-0 mt-2 w-80 max-h-[70vh] overflow-y-auto z-50 p-4 space-y-4"
+            style={{
+              background: 'var(--color-surface-elevated)',
+              borderRadius: 'var(--radius-lg)',
+              boxShadow: 'var(--shadow-modal)',
+            }}
+            role="menu"
+            aria-label="Фильтры"
+          >
+            <div>
+              <label className="label">Город</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setSelectedCity(null)}
+                  className={`pill text-xs ${selectedCity === null ? 'pill-active' : 'pill-inactive'}`}
+                  role="menuitem"
+                >
+                  Все
+                </button>
+                {cityOptions.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setSelectedCity(selectedCity === c ? null : c)}
+                    className={`pill text-xs ${selectedCity === c ? 'pill-active' : 'pill-inactive'}`}
+                    role="menuitem"
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="label">Спорт</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => { setSelectedSport(null); setSelectedLevel(null); setSelectedNtrp(null); }}
+                  className={`pill text-xs ${selectedSport === null ? 'pill-active' : 'pill-inactive'}`}
+                  role="menuitem"
+                >
+                  Все
+                </button>
+                {sports.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setSelectedSport(selectedSport === s ? null : s);
+                      setSelectedLevel(null);
+                      setSelectedNtrp(null);
+                    }}
+                    className={`pill text-xs ${selectedSport === s ? 'pill-active' : 'pill-inactive'}`}
+                    role="menuitem"
+                  >
+                    <span aria-hidden="true">{sportIcons[s]}</span>
+                    {sportNames[s]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedSport === 'tennis' ? (
+              <div>
+                <label className="label">Уровень NTRP</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setSelectedNtrp(null)}
+                    className={`pill text-xs ${selectedNtrp === null ? 'pill-active' : 'pill-inactive'}`}
+                    role="menuitem"
+                  >
+                    Любой
+                  </button>
+                  {NTRP_LEVELS.map(n => (
+                    <button
+                      key={n}
+                      onClick={() => setSelectedNtrp(selectedNtrp === n ? null : n)}
+                      className={`pill text-xs ${selectedNtrp === n ? 'pill-active' : 'pill-inactive'}`}
+                      role="menuitem"
+                    >
+                      {ntrpLevelNames[n]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : selectedSport ? (
+              <div>
+                <label className="label">Уровень</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setSelectedLevel(null)}
+                    className={`pill text-xs ${selectedLevel === null ? 'pill-active' : 'pill-inactive'}`}
+                    role="menuitem"
+                  >
+                    Любой
+                  </button>
+                  {(['beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
+                    <button
+                      key={l}
+                      onClick={() => setSelectedLevel(selectedLevel === l ? null : l)}
+                      className={`pill text-xs ${selectedLevel === l ? 'pill-active' : 'pill-inactive'}`}
+                      role="menuitem"
+                    >
+                      {levelNames[l]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {activeFilterCount > 0 && (
+              <button
+                onClick={resetFilters}
+                className="btn btn-ghost btn-sm btn-full"
+                role="menuitem"
+              >
+                Сбросить фильтры
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      <FilterBar
-        label="Город"
-        options={[{ value: null, label: 'Все города' }, ...cityOptions.map(c => ({ value: c, label: c }))]}
-        selected={selectedCity}
-        onChange={setSelectedCity}
-      />
-
-      <FilterBar
-        label="Спорт"
-        options={sports.map(s => ({ value: s, label: `${sportIcons[s]} ${sportNames[s]}` }))}
-        selected={selectedSport}
-        onChange={setSelectedSport}
-        renderOption={({ value, selected, onClick }) => (
-          <button
-            key={value as Sport}
-            onClick={onClick}
-            className={selected ? 'pill pill-active' : 'pill pill-inactive'}
-            aria-pressed={selected}
-          >
-            <span aria-hidden="true">{sportIcons[value as Sport]}</span>
-            {sportNames[value as Sport]}
-          </button>
-        )}
-      />
-
-      <FilterBar
-        label="Уровень"
-        options={levels.map(l => ({ value: l, label: levelNames[l] }))}
-        selected={selectedLevel}
-        onChange={setSelectedLevel}
-      />
+      {activeFilterCount > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedCity && (
+            <span className="pill pill-active text-xs">
+              {selectedCity}
+              <button onClick={() => setSelectedCity(null)} aria-label="Убрать город" className="ml-1 opacity-60 hover:opacity-100">✕</button>
+            </span>
+          )}
+          {selectedSport && (
+            <span className="pill pill-active text-xs">
+              {sportIcons[selectedSport]} {sportNames[selectedSport]}
+              <button onClick={() => { setSelectedSport(null); setSelectedLevel(null); setSelectedNtrp(null); }} aria-label="Убрать спорт" className="ml-1 opacity-60 hover:opacity-100">✕</button>
+            </span>
+          )}
+          {selectedNtrp && (
+            <span className="pill pill-active text-xs">
+              NTRP {selectedNtrp}
+              <button onClick={() => setSelectedNtrp(null)} aria-label="Убрать NTRP" className="ml-1 opacity-60 hover:opacity-100">✕</button>
+            </span>
+          )}
+          {selectedLevel && !selectedNtrp && (
+            <span className="pill pill-active text-xs">
+              {levelNames[selectedLevel]}
+              <button onClick={() => setSelectedLevel(null)} aria-label="Убрать уровень" className="ml-1 opacity-60 hover:opacity-100">✕</button>
+            </span>
+          )}
+        </div>
+      )}
 
       {matches.length === 0 ? (
         <EmptyState
@@ -225,40 +394,6 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
           onClose={() => setSelectedMatch(null)}
         />
       )}
-    </div>
-  );
-}
-
-interface FilterBarProps<T extends string | null> {
-  label: string;
-  options: { value: T; label: string }[];
-  selected: T;
-  onChange: (value: T) => void;
-  renderOption?: ({ value, selected, onClick }: { value: T; selected: boolean; onClick: () => void }) => React.ReactNode;
-}
-
-function FilterBar<T extends string | null>({ label, options, selected, onChange, renderOption }: FilterBarProps<T>) {
-  return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="group" aria-label={label}>
-      {options.map((opt) => {
-        const isSelected = selected === opt.value;
-        const handleClick = () => onChange(isSelected ? null as T : opt.value);
-
-        if (renderOption) {
-          return renderOption({ value: opt.value, selected: isSelected, onClick: handleClick });
-        }
-
-        return (
-          <button
-            key={String(opt.value)}
-            onClick={handleClick}
-            className={isSelected ? 'pill pill-active' : 'pill pill-inactive'}
-            aria-pressed={isSelected}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -314,7 +449,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
           <span aria-hidden="true">📅</span>
           {formatDate(match.startDate)}
         </span>
-        <span className="font-semibold" style={{ color: 'var(--color-accent)' }}>
+        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
           <span aria-hidden="true">⏱️</span>{' '}
           {timeUntil(match.startDate)}
         </span>
@@ -327,7 +462,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
       </div>
 
       {isJoined && (
-        <div className="pill self-start" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-accent)' }}>
+        <div className="pill self-start" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-text-primary)' }}>
           ✓ Вы записаны
         </div>
       )}
@@ -345,7 +480,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
       <div className="flex items-center justify-between gap-3 pt-2 border-t border-[var(--color-divider)]">
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-semibold" style={{ color: match.openSpots > 0 ? 'var(--color-positive)' : 'var(--color-text-tertiary)' }}>
+            <span className="font-semibold" style={{ color: match.openSpots > 0 ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)' }}>
               {match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}
             </span>
             <span style={{ color: 'var(--color-text-tertiary)' }}>из {match.totalSpots}</span>
@@ -355,7 +490,7 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${match.totalSpots > 0 ? Math.max(0, Math.min(100, Math.round((match.openSpots / match.totalSpots) * 100))) : 0}%`,
-                background: match.openSpots > 0 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+                background: match.openSpots > 0 ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
               }}
             />
           </div>

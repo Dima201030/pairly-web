@@ -32,6 +32,16 @@ export const levelNames: Record<string, string> = {
   advanced: 'Продвинутый',
 };
 
+export const ntrpLevelNames: Record<string, string> = {
+  '2.0': '2.0 — Новичок',
+  '2.5': '2.5 — Начинающий',
+  '3.0': '3.0 — Средний',
+  '3.5': '3.5 — Выше среднего',
+  '4.0': '4.0 — Продвинутый',
+  '4.5': '4.5 — Высокий',
+  '5.0': '5.0 — Профессионал',
+};
+
 export const roleNames: Record<string, string> = {
   user: 'Игрок',
   moderator: 'Модератор',

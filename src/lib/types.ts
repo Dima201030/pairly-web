@@ -6,6 +6,8 @@ export type TennisType = 'singles' | 'doubles';
 
 export type NTRPRange = 'beginner' | 'intermediate' | 'advanced' | 'open';
 
+export type NTRPLevel = '2.0' | '2.5' | '3.0' | '3.5' | '4.0' | '4.5' | '5.0';
+
 export type UserRole = 'user' | 'moderator' | 'support' | 'host';
 
 export type TournamentStatus = 'open' | 'finished' | 'cancelled';
