@@ -8,7 +8,6 @@ import { formatDate, timeUntil } from '@/lib/format';
 import { collection, query, where, orderBy, onSnapshot, Timestamp, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { YandexMap } from '@/components/ui/YandexMap';
 import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
 import { MatchListSkeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -438,7 +437,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void
           onAction={() => onNavigate?.('create')}
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list" aria-label="Список матчей">
+        <div className="flex flex-col gap-3" role="list" aria-label="Список матчей">
           {filteredMatches.map((match, index) => (
             <MatchCard
               key={match.id}
@@ -478,7 +477,6 @@ interface MatchCardProps {
 function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: MatchCardProps) {
   const isJoined = match.participants.includes(profile?.uid || '');
   const sportColor = sportColors[match.sport];
-  const hasMap = match.latitude !== 0 || match.longitude !== 0;
 
   return (
     <article
@@ -488,64 +486,54 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
       onClick={onOpen}
     >
       <div className="flex gap-3">
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex gap-3">
-            <div
-              className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold"
-              style={{
-                backgroundColor: `${sportColor}1F`,
-                border: `1px solid ${sportColor}33`,
-                color: sportColor,
-              }}
-            >
-              {sportIcons[match.sport]}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-0.5">
-                <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
-                  {match.venue}
-                </h3>
-                <span className="pill pill-inactive !py-0.5 !text-[10px] shrink-0">
-                  {match.city}
-                </span>
-              </div>
-              <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{match.district}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-              {formatDate(match.startDate)}
-            </span>
-            <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              {timeUntil(match.startDate)}
-            </span>
-            <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
-              {sportNames[match.sport]}
-            </span>
-            <span className="badge badge-gray">
-              {levelNames[match.level]}
-            </span>
-          </div>
-
-          {isJoined && (
-            <div className="pill self-start" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-text-primary)' }}>
-              ✓ Вы записаны
-            </div>
-          )}
-
-          {match.note && (
-            <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-tertiary)' }}>{match.note}</p>
-          )}
+        <div
+          className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold"
+          style={{
+            backgroundColor: `${sportColor}1F`,
+            border: `1px solid ${sportColor}33`,
+            color: sportColor,
+          }}
+        >
+          {sportIcons[match.sport]}
         </div>
 
-        {hasMap && (
-          <div className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] shrink-0 rounded-2xl overflow-hidden">
-            <YandexMap lat={match.latitude} lng={match.longitude} height={120} className="w-full h-full" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-0.5">
+            <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--color-text-primary)' }}>
+              {match.venue}
+            </h3>
+            <span className="pill pill-inactive !py-0.5 !text-[10px] shrink-0">
+              {match.city}
+            </span>
           </div>
-        )}
+          <p className="text-xs truncate" style={{ color: 'var(--color-text-tertiary)' }}>{match.district}</p>
+        </div>
       </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
+          {formatDate(match.startDate)}
+        </span>
+        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          {timeUntil(match.startDate)}
+        </span>
+        <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
+          {sportNames[match.sport]}
+        </span>
+        <span className="badge badge-gray">
+          {levelNames[match.level]}
+        </span>
+      </div>
+
+      {isJoined && (
+        <div className="pill self-start" style={{ background: 'var(--color-accent-subtle)', color: 'var(--color-text-primary)' }}>
+          ✓ Вы записаны
+        </div>
+      )}
+
+      {match.note && (
+        <p className="text-xs line-clamp-2" style={{ color: 'var(--color-text-tertiary)' }}>{match.note}</p>
+      )}
 
       <div className="flex items-center justify-between gap-3 pt-2 border-t border-[var(--color-divider)]">
         <div className="flex-1 min-w-0">
