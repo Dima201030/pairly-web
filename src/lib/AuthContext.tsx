@@ -175,11 +175,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profileData = Object.fromEntries(
       Object.entries(updated).filter(([key]) => !serverFields.has(key))
     );
-    await setDoc(doc(db, 'users', user.uid), {
-      ...profileData,
-      createdAt: Timestamp.fromDate(updated.createdAt),
-    }, { merge: true });
-    setProfile(updated);
+    try {
+      await setDoc(doc(db, 'users', user.uid), {
+        ...profileData,
+        createdAt: Timestamp.fromDate(updated.createdAt),
+      }, { merge: true });
+      setProfile(updated);
+    } catch (err) {
+      console.error('[AuthContext] updateProfile failed', err);
+      throw err;
+    }
   }, [user, profile]);
 
   // Ручное восстановление профиля (кнопка на вкладке «Профиль»): повторно

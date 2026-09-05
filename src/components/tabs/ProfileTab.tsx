@@ -57,15 +57,20 @@ export function ProfileTab() {
 
   const saveProfile = async () => {
     if (!user) return;
-    await updateProfile({
-      displayName: editForm.displayName,
-      city: editForm.city,
-      sport: editForm.sport || undefined,
-      level: editForm.level,
-      ntrp: editForm.ntrp ? parseFloat(editForm.ntrp) : undefined,
-    });
-    setEditing(false);
-    showToast('Профиль сохранён', 'success');
+    try {
+      await updateProfile({
+        displayName: editForm.displayName,
+        city: editForm.city,
+        sport: editForm.sport || undefined,
+        level: editForm.level,
+        ntrp: editForm.ntrp ? parseFloat(editForm.ntrp) : undefined,
+      });
+      setEditing(false);
+      showToast('Профиль сохранён', 'success');
+    } catch (err) {
+      console.error('[ProfileTab] saveProfile failed', err);
+      showToast('Ошибка сохранения: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'), 'error');
+    }
   };
 
   const toggleEdit = () => {
