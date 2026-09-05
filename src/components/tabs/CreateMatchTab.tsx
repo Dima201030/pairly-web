@@ -71,9 +71,9 @@ export function CreateMatchTab({ onCreated }: CreateMatchTabProps) {
         openSpots: form.openSpots,
         totalSpots: form.openSpots + 1,
         hostName: profile.displayName,
-        hostRating: profile.rating,
-        hostNTRP: form.sport === 'tennis' ? profile.ntrp : null,
-        note: form.note.trim(),
+        hostRating: profile.rating ?? 5.0,
+        hostNTRP: form.sport === 'tennis' ? (profile.ntrp ?? null) : null,
+        note: form.note.trim() || null,
         tennisType: form.sport === 'tennis' ? form.tennisType : null,
         ntrpRange: null,
         latitude: selectedVenue.latitude,
@@ -85,8 +85,9 @@ export function CreateMatchTab({ onCreated }: CreateMatchTabProps) {
       showToast('Заявка создана!', 'success');
       setForm(f => ({ ...f, venueId: '', note: '' }));
       onCreated?.();
-    } catch {
-      showToast('Ошибка при создании', 'error');
+    } catch (err) {
+      console.error('[CreateMatch] failed', err);
+      showToast('Ошибка: ' + (err instanceof Error ? err.message : String(err)), 'error');
     } finally {
       setLoading(false);
     }
