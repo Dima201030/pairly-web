@@ -26,23 +26,23 @@ export function CookieConsent() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[550] p-3 sm:p-4 md:p-6 overflow-x-hidden animate-slide-up"
+      className="fixed bottom-0 left-0 right-0 z-[550] px-3 py-2 sm:p-4 md:p-6 overflow-x-hidden animate-slide-up safe-bottom"
       style={{ background: 'var(--color-surface-elevated)', borderTop: '1px solid var(--color-border)' }}
     >
-      <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-        <p className="text-sm flex-1 min-w-0" style={{ color: 'var(--color-text-secondary)' }}>
-          Мы используем cookie для хранения ваших настроек и авторизации. Без cookie приложение не сможет работать.
+      <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-4">
+        <p className="text-xs sm:text-sm flex-1 min-w-0" style={{ color: 'var(--color-text-secondary)' }}>
+          Cookie нужны для авторизации и настроек.
         </p>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-1.5 sm:gap-2 shrink-0">
           <button
             onClick={handleDecline}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost btn-sm !text-xs sm:!text-sm"
           >
             Отклонить
           </button>
           <button
             onClick={handleAccept}
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary btn-sm !text-xs sm:!text-sm"
           >
             Принять
           </button>

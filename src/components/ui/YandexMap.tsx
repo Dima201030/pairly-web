@@ -139,8 +139,8 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
   }
 
   return (
-    <div className={`relative rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
-      <div ref={mapRef} className="w-full h-full" />
+    <div className={`relative rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height, maxWidth: '100%' }}>
+      <div ref={mapRef} style={{ width: '100%', height: '100%', maxWidth: '100%', overflow: 'hidden' }} />
       <a
         href={mapsUrl}
         target="_blank"
