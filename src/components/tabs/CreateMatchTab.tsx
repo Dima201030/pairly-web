@@ -109,7 +109,7 @@ export function CreateMatchTab() {
           {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(sport => (
             <label
               key={sport}
-              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all press-scale shrink-0 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border cursor-pointer transition-all press-scale shrink-0 ${
                 form.sport === sport
                   ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
                   : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]'
@@ -123,7 +123,7 @@ export function CreateMatchTab() {
                 onChange={() => setForm(f => ({ ...f, sport, venueId: '' }))}
                 className="sr-only"
               />
-              <span className="text-sm font-medium">{sportNames[sport]}</span>
+              <span className="text-xs sm:text-sm font-medium">{sportNames[sport]}</span>
             </label>
           ))}
         </div>
@@ -159,7 +159,7 @@ export function CreateMatchTab() {
 
             {selectedVenue && (selectedVenue.latitude !== 0 || selectedVenue.longitude !== 0) && (
               <div className="rounded-xl overflow-hidden">
-                <YandexMap lat={selectedVenue.latitude} lng={selectedVenue.longitude} height={160} />
+                <YandexMap lat={selectedVenue.latitude} lng={selectedVenue.longitude} height={120} />
               </div>
             )}
 
@@ -179,7 +179,7 @@ export function CreateMatchTab() {
       </Section>
 
       <Section title="Уровень и места">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
           <div>
             <label className="label" htmlFor="level">Уровень</label>
             <select
@@ -251,7 +251,7 @@ interface SectionProps {
 
 function Section({ title, children }: SectionProps) {
   return (
-    <div className="card p-4 space-y-3">
+    <div className="card p-3 sm:p-4 space-y-2.5 sm:space-y-3">
       <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
         {title}
       </h3>
