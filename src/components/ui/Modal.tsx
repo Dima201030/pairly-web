@@ -7,9 +7,10 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   maxWidth?: string;
+  panelBg?: string;
 }
 
-export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: ModalProps) {
+export function Modal({ title, onClose, children, maxWidth = 'max-w-lg', panelBg }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,14 +60,14 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
         ref={panelRef}
         tabIndex={-1}
         className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[92vh] overflow-y-auto overflow-x-hidden relative outline-none animate-slide-up`}
-        style={{ background: 'var(--color-surface)' }}
+        style={{ background: panelBg || 'var(--color-surface)' }}
       >
         <div className="sm:hidden flex justify-center pt-2 pb-1">
           <div className="w-8 h-1 rounded-full" style={{ background: 'var(--color-text-tertiary)' }} />
         </div>
         <div
           className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 border-b border-[var(--color-border)]"
-          style={{ background: 'var(--color-surface)' }}
+        style={{ background: panelBg || 'var(--color-surface)' }}
         >
           <h2 className="font-bold text-base sm:text-lg truncate min-w-0">{title}</h2>
           <button

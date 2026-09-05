@@ -147,76 +147,80 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
   const canChat = profile && (isJoined || isStaff);
 
   return (
-    <Modal title={match.venue} onClose={onClose} maxWidth="max-w-xl">
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="pill pill-inactive !py-0.5 text-xs">{match.city}</span>
-          <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
-            {sportIcons[match.sport]} {sportNames[match.sport]}
-          </span>
-          <span className="badge badge-gray">{levelNames[match.level]}</span>
-        </div>
+    <Modal title={match.venue} onClose={onClose} maxWidth="max-w-2xl" panelBg="#141414">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 min-w-0 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="pill pill-inactive !py-0.5 text-xs">{match.city}</span>
+              <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>
+                {sportIcons[match.sport]} {sportNames[match.sport]}
+              </span>
+              <span className="badge badge-gray">{levelNames[match.level]}</span>
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Когда</p>
-            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{formatDate(match.startDate)}</p>
-            <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{timeUntil(match.startDate)}</p>
-          </div>
-          <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Места</p>
-            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}</p>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>из {match.totalSpots}</p>
-          </div>
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Когда</p>
+                <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{formatDate(match.startDate)}</p>
+                <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{timeUntil(match.startDate)}</p>
+              </div>
+              <div className="p-3 rounded-xl" style={{ background: '#1a1a1a', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+                <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Места</p>
+                <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{match.openSpots > 0 ? `Свободно ${match.openSpots}` : 'Мест нет'}</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>из {match.totalSpots}</p>
+              </div>
+            </div>
 
-        {hasMap && (
-          <div>
-            <YandexMap lat={match.latitude} lng={match.longitude} height={160} />
-          </div>
-        )}
-
-        {match.note && (
-          <div className="p-3 rounded-xl text-sm" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-secondary)' }}>
-            {match.note}
-          </div>
-        )}
-
-        <div>
-          <h3 className="font-semibold mb-2 flex items-center gap-2">
-            <span className="w-1 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
-            Участники ({match.participants.length}/{match.totalSpots})
-          </h3>
-          <ul className="space-y-1.5">
-            {match.participants.map((uid) => (
-              <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                <span className="w-8 h-8 shrink-0 rounded-full font-bold flex items-center justify-center text-sm" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
-                  {(participantName(uid) || '?')[0].toUpperCase()}
-                </span>
-                <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{participantName(uid)}</span>
-                {uid === match.authorId && <span className="badge badge-blue ml-auto">Хост</span>}
-                {uid === profile?.uid && <span className="badge badge-green ml-auto">Вы</span>}
-              </li>
-            ))}
-            {match.participants.length === 0 && (
-              <li className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Пока никто не записан</li>
+            {match.note && (
+              <div className="p-3 rounded-xl text-sm" style={{ background: '#1a1a1a', border: '1px solid var(--color-divider)', borderRadius: 'var(--radius-md)', color: 'var(--color-text-secondary)' }}>
+                {match.note}
+              </div>
             )}
-          </ul>
-        </div>
 
-        <div className="flex gap-2">
-          {isJoined ? (
-            <button onClick={() => toggleJoin(true)} disabled={joining} className="btn btn-outline btn-full">
-              {joining ? 'Отмена...' : 'Покинуть матч'}
-            </button>
-          ) : (
-            <button
-              onClick={() => toggleJoin(false)}
-              disabled={joining || match.openSpots === 0}
-              className={`btn btn-full ${match.openSpots > 0 ? 'btn-primary' : 'btn-outline'}`}
-            >
-              {joining ? 'Запись...' : match.openSpots > 0 ? 'Записаться' : 'Мест нет'}
-            </button>
+            <div>
+              <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <span className="w-1 h-4 rounded-full" style={{ background: 'var(--color-accent)' }} aria-hidden="true" />
+                Участники ({match.participants.length}/{match.totalSpots})
+              </h3>
+              <ul className="space-y-1.5">
+                {match.participants.map((uid) => (
+                  <li key={uid} className="flex items-center gap-2.5 p-2.5 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                    <span className="w-8 h-8 shrink-0 rounded-full font-bold flex items-center justify-center text-sm" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-primary)' }}>
+                      {(participantName(uid) || '?')[0].toUpperCase()}
+                    </span>
+                    <span className="font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{participantName(uid)}</span>
+                    {uid === match.authorId && <span className="badge badge-blue ml-auto">Хост</span>}
+                    {uid === profile?.uid && <span className="badge badge-green ml-auto">Вы</span>}
+                  </li>
+                ))}
+                {match.participants.length === 0 && (
+                  <li className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Пока никто не записан</li>
+                )}
+              </ul>
+            </div>
+
+            <div className="flex gap-2">
+              {isJoined ? (
+                <button onClick={() => toggleJoin(true)} disabled={joining} className="btn btn-outline btn-full">
+                  {joining ? 'Отмена...' : 'Покинуть матч'}
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleJoin(false)}
+                  disabled={joining || match.openSpots === 0}
+                  className={`btn btn-full ${match.openSpots > 0 ? 'btn-primary' : 'btn-outline'}`}
+                >
+                  {joining ? 'Запись...' : match.openSpots > 0 ? 'Записаться' : 'Мест нет'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {hasMap && (
+            <div className="sm:w-[200px] sm:h-[200px] shrink-0 rounded-2xl overflow-hidden">
+              <YandexMap lat={match.latitude} lng={match.longitude} height={200} className="w-full h-full" />
+            </div>
           )}
         </div>
 
