@@ -46,8 +46,8 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
 
   return (
     <div
-      className="fixed inset-0 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center overflow-x-hidden animate-slide-up"
-      style={{ background: 'rgba(0,0,0,0.7)' }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-x-hidden animate-slide-up sm:backdrop-blur-sm"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -58,12 +58,15 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[94vh] overflow-y-auto overflow-x-hidden relative outline-none animate-slide-up`}
+        className={`border border-[var(--color-border)] shadow-[var(--shadow-modal)] rounded-t-[var(--radius-xl)] sm:rounded-[var(--radius-xl)] w-full ${maxWidth} max-h-[92vh] overflow-y-auto overflow-x-hidden relative outline-none animate-slide-up`}
         style={{ background: 'var(--color-surface)' }}
       >
+        <div className="sm:hidden flex justify-center pt-2 pb-1">
+          <div className="w-8 h-1 rounded-full" style={{ background: 'var(--color-text-tertiary)' }} />
+        </div>
         <div
           className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 border-b border-[var(--color-border)]"
-          style={{ background: 'var(--color-surface)', backdropFilter: 'blur(10px)' }}
+          style={{ background: 'var(--color-surface)' }}
         >
           <h2 className="font-bold text-base sm:text-lg truncate min-w-0">{title}</h2>
           <button
@@ -74,7 +77,7 @@ export function Modal({ title, onClose, children, maxWidth = 'max-w-lg' }: Modal
             ✕
           </button>
         </div>
-        <div className="p-3 sm:p-5">{children}</div>
+        <div className="p-3 sm:p-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-5">{children}</div>
       </div>
     </div>
   );

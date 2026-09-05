@@ -125,7 +125,7 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
 
   if (error || !apiKey) {
     return (
-      <div className={`rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
+      <div className={`relative rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
         <a
           href={mapsUrl}
           target="_blank"
@@ -139,7 +139,7 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
   }
 
   return (
-    <div className={`rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
+    <div className={`relative rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)] ${className}`} style={{ height }}>
       <div ref={mapRef} className="w-full h-full" />
       <a
         href={mapsUrl}
