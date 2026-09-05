@@ -46,7 +46,7 @@ export function Sidebar({ open, onClose, activePage, onNavigate }: SidebarProps)
   return (
     <>
       <div
-        className={`fixed inset-0 z-[400] bg-black/60 transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 z-[400] bg-black transition-opacity duration-300 md:hidden ${
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}

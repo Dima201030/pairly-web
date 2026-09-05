@@ -145,7 +145,7 @@ export function YandexMap({ lat, lng, zoom = 16, height = 200, className = '' }:
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute bottom-2 right-2 px-2 py-1 rounded-[var(--radius-md)] bg-[var(--color-surface)]/80 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] backdrop-blur-sm border border-[var(--color-border)]"
+        className="absolute bottom-2 right-2 px-2 py-1 rounded-[var(--radius-md)] bg-[var(--color-surface)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] border border-[var(--color-border)]"
       >
         Открыть в Картах
       </a>

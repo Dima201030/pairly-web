@@ -4,10 +4,10 @@
   /* ── COLOR SYSTEM — Achromatic, fynor.online inspired ── */
   --color-bg: #000000;
   --color-bg-alt: #050505;
-  --color-surface: rgba(255, 255, 255, 0.05);
-  --color-surface-hover: rgba(255, 255, 255, 0.08);
-  --color-surface-elevated: rgba(255, 255, 255, 0.07);
-  --color-surface-glass: rgba(0, 0, 0, 0.85);
+  --color-surface: #0a0a0a;
+  --color-surface-hover: #141414;
+  --color-surface-elevated: #111111;
+  --color-surface-glass: #0a0a0a;
 
   /* Ink levels — neutral gray */
   --color-text-primary: #E0E0E0;
@@ -19,27 +19,27 @@
   --color-accent: #FFFFFF;
   --color-accent-dim: #CCCCCC;
   --color-accent-bright: #FFFFFF;
-  --color-accent-subtle: rgba(255, 255, 255, 0.08);
+  --color-accent-subtle: #141414;
   --color-accent-on: #000000;
 
   /* Secondary: warm amber for highlights */
   --color-highlight: #BBBBBB;
   --color-highlight-dim: #999999;
-  --color-highlight-subtle: rgba(255, 255, 255, 0.06);
+  --color-highlight-subtle: #111111;
 
   /* Semantic — muted, functional */
   --color-positive: #666666;
-  --color-positive-subtle: rgba(102, 102, 102, 0.15);
+  --color-positive-subtle: #0d0d0d;
   --color-negative: #999999;
-  --color-negative-subtle: rgba(153, 153, 153, 0.15);
+  --color-negative-subtle: #1a1a1a;
   --color-warning: #888888;
-  --color-warning-subtle: rgba(136, 136, 136, 0.15);
+  --color-warning-subtle: #141414;
 
-  /* Border / Divider — very subtle */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.15);
-  --color-border-focus: rgba(255, 255, 255, 0.4);
-  --color-divider: rgba(255, 255, 255, 0.06);
+  /* Border / Divider — solid */
+  --color-border: #1a1a1a;
+  --color-border-hover: #2a2a2a;
+  --color-border-focus: #555555;
+  --color-divider: #1a1a1a;
 
   /* ── TYPOGRAPHY ── */
   --step--1: 0.8rem;
@@ -181,9 +181,7 @@
 @layer components {
   /* ── GLASS SURFACES ── */
   .glass {
-    background: var(--color-surface-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--color-surface);
   }
 
   .card {
@@ -205,7 +203,6 @@
 
   .card-interactive:hover {
     background: var(--color-surface-hover);
-    box-shadow: var(--shadow-card-hover);
   }
 
   .card-interactive:active {
@@ -264,7 +261,6 @@
 
   .btn-primary:hover:not(:disabled) {
     background: #E0E0E0;
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.15);
   }
 
   .btn-secondary {
@@ -316,7 +312,6 @@
 
   .btn-brand-gradient:hover:not(:disabled) {
     background: #E0E0E0;
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.15);
   }
 
   .btn-primary-blue {
@@ -368,7 +363,6 @@
 
   .input-field:focus {
     border-color: var(--color-border-focus);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
   }
 
   .input-field:disabled {

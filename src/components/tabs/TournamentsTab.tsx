@@ -214,7 +214,7 @@ export function TournamentsTab() {
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]" style={{ background: 'rgba(0,0,0,0.6)' }} role="dialog" aria-modal="true" aria-labelledby="tournaments-modal-title" ref={modalRef}>
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-[var(--z-modal)]" style={{ background: '#000000' }} role="dialog" aria-modal="true" aria-labelledby="tournaments-modal-title" ref={modalRef}>
           <div className="card-elevated max-w-md w-full max-h-[90vh] overflow-y-auto p-5 relative" style={{ background: 'var(--color-surface)' }}>
             <h2 id="tournaments-modal-title" className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Новый турнир</h2>
             <form onSubmit={createTournament} className="space-y-3">
