@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // но у пользователя нет профиля → нельзя записаться ни на что (M5-аналог).
       const serverFields = new Set(['role', 'blocked']);
       const profileData = Object.fromEntries(
-        Object.entries(newProfile).filter(([key]) => !serverFields.has(key))
+        Object.entries(newProfile).filter(([key, val]) => !serverFields.has(key) && val !== undefined)
       );
       await setDoc(doc(db, 'users', result.user.uid), {
         ...profileData,
@@ -170,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updated = { ...profile, ...data };
     const serverFields = new Set(['role', 'blocked']);
     const profileData = Object.fromEntries(
-      Object.entries(updated).filter(([key]) => !serverFields.has(key))
+      Object.entries(updated).filter(([key, val]) => !serverFields.has(key) && val !== undefined)
     );
     const createdAt = updated.createdAt instanceof Date
       ? Timestamp.fromDate(updated.createdAt)
