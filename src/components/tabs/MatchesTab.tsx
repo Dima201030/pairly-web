@@ -14,6 +14,13 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 
 const NTRP_LEVELS: NTRPLevel[] = ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0'];
 
+function getLevelOptions(sport: Sport | null): (SkillLevel | NTRPLevel)[] {
+  if (sport === 'tennis') {
+    return ['any', '2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0'] as (SkillLevel | NTRPLevel)[];
+  }
+  return ['any', 'beginner', 'middle', 'advanced'] as SkillLevel[];
+}
+
 export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { profile, isStaff } = useAuth();
   const { showToast } = useToast();
@@ -26,8 +33,8 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [cities, setCities] = useState<string[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const filtersRef = useRef<HTMLDivElement>(null);
+  const [activeFilter, setActiveFilter] = useState<'city' | 'sport' | 'level' | 'ntrp' | null>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -149,17 +156,33 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
     setSelectedSport(null);
     setSelectedLevel(null);
     setSelectedNtrp(null);
+    setActiveFilter(null);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (filtersRef.current && !filtersRef.current.contains(e.target as Node)) {
-        setFiltersOpen(false);
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setActiveFilter(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const filterOptions: Array<{ key: string; label: string; icon: string }> = [
+    { key: 'city', label: 'Город', icon: '📍' },
+    { key: 'sport', label: 'Спорт', icon: '🎾' },
+    { key: 'level', label: 'Уровень', icon: '📊' },
+    { key: 'ntrp', label: 'NTRP', icon: '🎯' },
+  ];
+
+  const getFilterValue = (): string => {
+    if (selectedCity) return selectedCity;
+    if (selectedSport) return sportNames[selectedSport];
+    if (selectedLevel) return levelNames[selectedLevel];
+    if (selectedNtrp) return ntrpLevelNames[selectedNtrp];
+    return 'Фильтры';
+  };
 
   if (loading) {
     return (
@@ -191,26 +214,31 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
         </div>
       </div>
 
-      <div className="relative" ref={filtersRef}>
+      <div className="relative" ref={filterRef}>
         <button
-          onClick={() => setFiltersOpen(!filtersOpen)}
-          className="btn btn-secondary btn-sm flex items-center gap-2"
-          aria-expanded={filtersOpen}
+          onClick={() => setActiveFilter(activeFilter === null ? 'city' : null)}
+          className="btn btn-secondary btn-sm flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
+          style={{
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-text-primary)',
+          }}
+          aria-expanded={activeFilter !== null}
           aria-haspopup="true"
         >
-          <span aria-hidden="true">☰</span>
+          <span aria-hidden="true">▼</span>
           Фильтры
+          <span className="ml-2 text-xs opacity-60">
+            {getFilterValue()}
+          </span>
           {activeFilterCount > 0 && (
-            <span
-              className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
-              style={{ background: 'var(--color-accent)', color: 'var(--color-accent-on)' }}
-            >
+            <span className="ml-2 text-[10px] font-bold" style={{ color: 'var(--color-accent)' }}>
               {activeFilterCount}
             </span>
           )}
         </button>
 
-        {filtersOpen && (
+        {activeFilter && (
           <div
             className="absolute top-full left-0 mt-2 w-80 max-h-[70vh] overflow-y-auto z-50 p-4 space-y-4"
             style={{
@@ -221,68 +249,125 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
             role="menu"
             aria-label="Фильтры"
           >
-            <div>
-              <label className="label">Город</label>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => setSelectedCity(null)}
-                  className={`pill text-xs ${selectedCity === null ? 'pill-active' : 'pill-inactive'}`}
+            <div className="flex flex-col gap-2 text-sm">
+              {filterOptions.map(option => (
+                <div
+                  key={option.key}
+                  onClick={() => setActiveFilter(option.key === 'ntrp' || option.key === 'level' ? option.key : option.key)}
                   role="menuitem"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: 'var(--radius-lg)',
+                    background: activeFilter === option.key ? 'var(--color-surface-hover)' : 'transparent',
+                  }}
                 >
-                  Все
-                </button>
-                {cityOptions.map(c => (
-                  <button
-                    key={c}
-                    onClick={() => setSelectedCity(selectedCity === c ? null : c)}
-                    className={`pill text-xs ${selectedCity === c ? 'pill-active' : 'pill-inactive'}`}
-                    role="menuitem"
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+                  <span className="flex items-center gap-2">
+                    <span aria-hidden="true">{option.icon}</span>
+                    {option.label}
+                  </span>
+                  {activeFilter === option.key && (
+                    <span className="ml-auto text-xs font-medium" style={{ color: 'var(--color-accent)' }}>
+                      >>
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
 
-            <div>
-              <label className="label">Спорт</label>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => { setSelectedSport(null); setSelectedLevel(null); setSelectedNtrp(null); }}
-                  className={`pill text-xs ${selectedSport === null ? 'pill-active' : 'pill-inactive'}`}
-                  role="menuitem"
-                >
-                  Все
-                </button>
-                {sports.map(s => (
+            {activeFilter === 'city' ? (
+              <div>
+                <label className="label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Город</label>
+                <div className="flex flex-wrap gap-1.5">
                   <button
-                    key={s}
+                    onClick={() => setSelectedCity(null)}
+                    className={`pill text-xs ${selectedCity === null ? 'pill-active' : 'pill-inactive'}`}
+                    role="menuitem"
+                  >
+                    Все
+                  </button>
+                  {cityOptions.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedCity(selectedCity === c ? null : c)}
+                      className={`pill text-xs ${selectedCity === c ? 'pill-active' : 'pill-inactive'}`}
+                      role="menuitem"
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {activeFilter === 'sport' ? (
+              <div>
+                <label className="label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Спорт</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
                     onClick={() => {
-                      setSelectedSport(selectedSport === s ? null : s);
+                      setSelectedSport(null);
                       setSelectedLevel(null);
                       setSelectedNtrp(null);
                     }}
-                    className={`pill text-xs ${selectedSport === s ? 'pill-active' : 'pill-inactive'}`}
+                    className={`pill text-xs ${selectedSport === null ? 'pill-active' : 'pill-inactive'}`}
                     role="menuitem"
                   >
-                    <span aria-hidden="true">{sportIcons[s]}</span>
-                    {sportNames[s]}
+                    Все
                   </button>
-                ))}
+                  {sports.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        setSelectedSport(selectedSport === s ? null : s);
+                        setSelectedLevel(null);
+                        setSelectedNtrp(null);
+                      }}
+                      className={`pill text-xs ${selectedSport === s ? 'pill-active' : 'pill-inactive'}`}
+                      role="menuitem"
+                    >
+                      <span aria-hidden="true">{sportIcons[s]}</span>
+                      {sportNames[s]}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            {selectedSport === 'tennis' ? (
+            {activeFilter === 'level' ? (
               <div>
-                <label className="label">Уровень NTRP</label>
+                <label className="label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Уровень</label>
                 <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => setSelectedNtrp(null)}
-                    className={`pill text-xs ${selectedNtrp === null ? 'pill-active' : 'pill-inactive'}`}
-                    role="menuitem"
-                  >
-                    Любой
-                  </button>
+                  {getLevelOptions(selectedSport).map(l => {
+                    const levelKey = typeof l === 'number' ? String(l) : l;
+                    const levelName = selectedSport === 'tennis'
+                      ? ntrpLevelNames[levelKey as NTRPLevel]
+                      : levelNames[l as SkillLevel];
+                    return (
+                      <button
+                        key={levelKey}
+                        onClick={() => {
+                          if (selectedSport === 'tennis') {
+                            setSelectedNtrp(selectedNtrp === levelKey as NTRPLevel ? null : levelKey as NTRPLevel);
+                            setSelectedLevel(null);
+                          } else {
+                            setSelectedLevel(selectedLevel === l ? null : l);
+                          }
+                        }}
+                        className={`pill text-xs ${(selectedSport === 'tennis' ? selectedNtrp : selectedLevel) === levelKey ? 'pill-active' : 'pill-inactive'}`}
+                        role="menuitem"
+                      >
+                        {levelName}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
+            {activeFilter === 'ntrp' ? (
+              <div>
+                <label className="label" style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>Уровень NTRP</label>
+                <div className="flex flex-wrap gap-1.5">
                   {NTRP_LEVELS.map(n => (
                     <button
                       key={n}
@@ -291,29 +376,6 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
                       role="menuitem"
                     >
                       {ntrpLevelNames[n]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : selectedSport ? (
-              <div>
-                <label className="label">Уровень</label>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => setSelectedLevel(null)}
-                    className={`pill text-xs ${selectedLevel === null ? 'pill-active' : 'pill-inactive'}`}
-                    role="menuitem"
-                  >
-                    Любой
-                  </button>
-                  {(['beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
-                    <button
-                      key={l}
-                      onClick={() => setSelectedLevel(selectedLevel === l ? null : l)}
-                      className={`pill text-xs ${selectedLevel === l ? 'pill-active' : 'pill-inactive'}`}
-                      role="menuitem"
-                    >
-                      {levelNames[l]}
                     </button>
                   ))}
                 </div>
