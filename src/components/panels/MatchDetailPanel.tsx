@@ -12,6 +12,7 @@ import { formatDate, timeUntil } from '@/lib/format';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
+import { YandexMap } from '@/components/ui/YandexMap';
 
 interface MatchDetailPanelProps {
   matchId: string;
@@ -170,16 +171,8 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
         </div>
 
         {hasMap && (
-          <div className="rounded-xl overflow-hidden border border-[var(--color-border)]">
-            <iframe
-              width="100%"
-              height="160"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title={`Карта: ${match.venue}`}
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${match.longitude - 0.008}%2C${match.latitude - 0.004}%2C${match.longitude + 0.008}%2C${match.latitude + 0.004}&layer=mapnik&marker=${match.latitude}%2C${match.longitude}`}
-            />
+          <div>
+            <YandexMap lat={match.latitude} lng={match.longitude} height={160} />
           </div>
         )}
 

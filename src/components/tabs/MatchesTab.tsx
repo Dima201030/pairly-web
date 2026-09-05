@@ -8,6 +8,7 @@ import { formatDate, timeUntil } from '@/lib/format';
 import { collection, query, where, orderBy, onSnapshot, Timestamp, limit, doc, runTransaction, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { YandexMap } from '@/components/ui/YandexMap';
 import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
 import { useEffect, useState } from 'react';
 
@@ -335,16 +336,8 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
           )}
 
           {hasMap && (
-            <div className="mt-3 rounded-lg overflow-hidden border border-[var(--color-border)]">
-              <iframe
-                width="100%"
-                height="120"
-                style={{ border: 0 }}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`Карта: ${match.venue}`}
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${match.longitude - 0.008}%2C${match.latitude - 0.004}%2C${match.longitude + 0.008}%2C${match.latitude + 0.004}&layer=mapnik&marker=${match.latitude}%2C${match.longitude}`}
-              />
+            <div className="mt-3">
+              <YandexMap lat={match.latitude} lng={match.longitude} height={120} />
             </div>
           )}
         </div>

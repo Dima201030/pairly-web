@@ -8,6 +8,7 @@ import { Sport, SkillLevel, SavedVenue } from '@/lib/types';
 import { collection, doc, setDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { YandexMap } from '@/components/ui/YandexMap';
 
 const TWO_HOURS_FROM_NOW = Date.now() + 2 * 60 * 60 * 1000;
 
@@ -271,17 +272,5 @@ interface MapPreviewProps {
 }
 
 function MapPreview({ lat, lng, name }: MapPreviewProps) {
-  return (
-    <div className="rounded-xl overflow-hidden border border-[var(--color-border)]">
-      <iframe
-        width="100%"
-        height="200"
-        style={{ border: 0 }}
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-        src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01}%2C${lat - 0.005}%2C${lng + 0.01}%2C${lat + 0.005}&layer=mapnik&marker=${lat}%2C${lng}`}
-        title={`Карта: ${name}`}
-      />
-    </div>
-  );
+  return <YandexMap lat={lat} lng={lng} height={200} />;
 }

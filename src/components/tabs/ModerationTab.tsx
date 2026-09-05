@@ -8,6 +8,7 @@ import { UserProfile, UserRole, Tournament, SavedVenue, Match, SupportChat } fro
 import { roleNames, supportStatusNames } from '@/lib/theme';
 import { useEffect, useState } from 'react';
 import { SupportChatPanel } from '@/components/panels/SupportChatPanel';
+import { YandexMap } from '@/components/ui/YandexMap';
 
 export type ModerationSection = 'tournaments' | 'matches' | 'users' | 'venues' | 'support';
 
@@ -463,16 +464,8 @@ export function ModerationTab() {
               {venueCoords && (
                 <div className="text-sm text-[var(--color-text-secondary)]">
                   Координаты: {venueCoords.lat.toFixed(5)}, {venueCoords.lng.toFixed(5)}
-                  <div className="mt-2 rounded-xl overflow-hidden border border-[var(--color-border)]">
-                    <iframe
-                      width="100%"
-                      height="200"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={`Карта: ${newVenue.name}`}
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${venueCoords.lng - 0.01}%2C${venueCoords.lat - 0.005}%2C${venueCoords.lng + 0.01}%2C${venueCoords.lat + 0.005}&layer=mapnik&marker=${venueCoords.lat}%2C${venueCoords.lng}`}
-                    />
+                  <div className="mt-2">
+                    <YandexMap lat={venueCoords.lat} lng={venueCoords.lng} height={200} />
                   </div>
                 </div>
               )}
