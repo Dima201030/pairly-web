@@ -13,11 +13,11 @@ import { YandexMap } from '@/components/ui/YandexMap';
 export type ModerationSection = 'tournaments' | 'matches' | 'users' | 'venues' | 'support';
 
 const MODERATION_SECTIONS = [
-  { id: 'tournaments', label: 'Турниры', icon: '🏆' },
-  { id: 'matches', label: 'Матчи', icon: '🏟️' },
-  { id: 'users', label: 'Пользователи', icon: '👥' },
-  { id: 'venues', label: 'Клубы', icon: '🏟️' },
-  { id: 'support', label: 'Поддержка', icon: '🎧' },
+  { id: 'tournaments', label: 'Турниры' },
+  { id: 'matches', label: 'Матчи' },
+  { id: 'users', label: 'Пользователи' },
+  { id: 'venues', label: 'Клубы' },
+  { id: 'support', label: 'Поддержка' },
 ] as const;
 
 export function ModerationTab() {
@@ -111,7 +111,6 @@ export function ModerationTab() {
   if (!isStaff) {
     return (
       <div className="flex-1 flex items-center justify-center pb-24 md:pb-10 text-center px-4" style={{ color: 'var(--color-text-secondary)' }}>
-        <div className="text-4xl mb-3">🛡️</div>
         <p className="text-lg font-medium">Доступно только модераторам</p>
       </div>
     );
@@ -257,7 +256,7 @@ export function ModerationTab() {
             role="tab"
             aria-selected={activeSection === s.id}
           >
-            {s.icon} {s.label}
+            {s.label}
           </button>
         ))}
       </div>
@@ -292,7 +291,7 @@ export function ModerationTab() {
                     <span className={roleColors[user.role] || 'badge-gray'}>
                       {roleNames[user.role] || user.role}
                     </span>
-                    {user.blocked && <span className="text-xs font-medium" style={{ color: 'var(--color-negative)' }}>🚫 Заблокирован</span>}
+                    {user.blocked && <span className="text-xs font-medium" style={{ color: 'var(--color-negative)' }}>Заблокирован</span>}
                   </div>
                 </div>
               </div>
@@ -433,7 +432,7 @@ export function ModerationTab() {
                 disabled={!newVenue.name.trim() || geocoding}
                 className="btn btn-secondary btn-full"
               >
-                {geocoding ? 'Определяем координаты...' : '📍 Определить координаты по адресу'}
+                {geocoding ? 'Определяем координаты...' : 'Определить координаты по адресу'}
               </button>
               <div className="grid grid-cols-2 gap-3 pt-2 border-t" style={{ borderColor: 'var(--color-divider)' }}>
                 <div>
@@ -590,7 +589,7 @@ export function ModerationTab() {
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{user.displayName}</p>
                       <p className="text-sm truncate" style={{ color: 'var(--color-text-tertiary)' }}>{user.email || 'email не указан'}</p>
-                      {user.blocked && <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-negative)' }}>🚫 Заблокирован</p>}
+                      {user.blocked && <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-negative)' }}>Заблокирован</p>}
                     </div>
                   </div>
                   <button

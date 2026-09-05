@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { YandexMap } from '@/components/ui/YandexMap';
 import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 const NTRP_LEVELS: NTRPLevel[] = ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0'];
 
@@ -21,9 +22,10 @@ function getLevelOptions(sport: Sport | null): (SkillLevel | NTRPLevel)[] {
   return ['any', 'beginner', 'middle', 'advanced'] as SkillLevel[];
 }
 
-export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void }) {
+export function MatchesTab() {
   const { profile, isStaff } = useAuth();
   const { showToast } = useToast();
+  const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -169,11 +171,11 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filterOptions: Array<{ key: string; label: string; icon: string }> = [
-    { key: 'city', label: 'Город', icon: '📍' },
-    { key: 'sport', label: 'Спорт', icon: '🎾' },
-    { key: 'level', label: 'Уровень', icon: '📊' },
-    { key: 'ntrp', label: 'NTRP', icon: '🎯' },
+  const filterOptions: Array<{ key: string; label: string }> = [
+    { key: 'city', label: 'Город' },
+    { key: 'sport', label: 'Спорт' },
+    { key: 'level', label: 'Уровень' },
+    { key: 'ntrp', label: 'NTRP' },
   ];
 
   const getFilterValue = (): string => {
@@ -262,7 +264,6 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
                   }}
                 >
                   <span className="flex items-center gap-2">
-                    <span aria-hidden="true">{option.icon}</span>
                     {option.label}
                   </span>
                   {activeFilter === option.key && (
@@ -405,7 +406,7 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
           )}
           {selectedSport && (
             <span className="pill pill-active text-xs">
-              {sportIcons[selectedSport]} {sportNames[selectedSport]}
+              {sportNames[selectedSport]}
               <button onClick={() => { setSelectedSport(null); setSelectedLevel(null); setSelectedNtrp(null); }} aria-label="Убрать спорт" className="ml-1 opacity-60 hover:opacity-100">✕</button>
             </span>
           )}
@@ -426,11 +427,11 @@ export function MatchesTab({ onNavigate }: { onNavigate?: (tab: string) => void 
 
       {matches.length === 0 ? (
         <EmptyState
-          icon="🏟️"
+          icon=""
           title="Матчей пока нет"
           description="Создай первую заявку или подожди других игроков"
           actionLabel="Создать заявку"
-          onAction={() => onNavigate?.('create')}
+          onAction={() => router.push('/create')}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list" aria-label="Список матчей">
@@ -484,13 +485,14 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
     >
       <div className="flex gap-3">
         <div
-          className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+          className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold"
           style={{
             backgroundColor: `${sportColor}1F`,
             border: `1px solid ${sportColor}33`,
+            color: sportColor,
           }}
         >
-          <span aria-hidden="true">{sportIcons[match.sport]}</span>
+          {sportIcons[match.sport]}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -508,11 +510,9 @@ function MatchCard({ match, profile, index, joining, onJoin, onLeave, onOpen }: 
 
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-          <span aria-hidden="true">📅</span>
           {formatDate(match.startDate)}
         </span>
         <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-          <span aria-hidden="true">⏱️</span>{' '}
           {timeUntil(match.startDate)}
         </span>
         <span className="badge" style={{ backgroundColor: `${sportColor}1F`, color: sportColor }}>

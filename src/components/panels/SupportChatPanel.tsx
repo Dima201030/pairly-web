@@ -10,12 +10,11 @@ import { SupportChat, SupportMessage } from '@/lib/types';
 import { supportStatusNames } from '@/lib/theme';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
-import { Modal } from '@/components/ui/Modal';
 
 interface SupportChatPanelProps {
   mode: 'user' | 'staff';
   chatId?: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const OPEN_STATUSES = ['waiting', 'assigned', 'inProgress'];
@@ -63,9 +62,9 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             });
             return unsub;
           }
-          const chatId = crypto.randomUUID();
-          await setDoc(doc(db, 'supportChats', chatId), {
-            id: chatId,
+          const newChatId = crypto.randomUUID();
+          await setDoc(doc(db, 'supportChats', newChatId), {
+            id: newChatId,
             userID: profile.uid,
             userName: profile.displayName,
             userCity: profile.city ?? '',
@@ -79,7 +78,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             updatedAt: serverTimestamp(),
           });
           if (cancelled) return;
-          const unsub = onSnapshot(doc(db, 'supportChats', chatId), (s) => {
+          const unsub = onSnapshot(doc(db, 'supportChats', newChatId), (s) => {
             if (s.exists()) setChat({ id: s.id, ...s.data() } as SupportChat);
             setReady(true);
           });
@@ -192,18 +191,27 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
 
   if (!ready) {
     return (
-      <Modal title="Поддержка" onClose={onClose} maxWidth="max-w-xl">
-        <div className="flex items-center justify-center py-10" style={{ color: 'var(--color-text-tertiary)' }}>
-          Открываем чат...
-        </div>
-      </Modal>
+      <div className="flex items-center justify-center py-10" style={{ color: 'var(--color-text-tertiary)' }}>
+        Открываем чат...
+      </div>
     );
   }
 
   const mine = (authorID: string) => authorID === profile?.uid;
 
   return (
-    <Modal title={mode === 'user' ? 'Поддержка' : chat ? `Чат: ${chat.userName}` : 'Поддержка'} onClose={onClose} maxWidth="max-w-xl">
+    <div className="space-y-4 animate-in">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+          {mode === 'user' ? 'Поддержка' : chat ? `Чат: ${chat.userName}` : 'Поддержка'}
+        </h1>
+        {onClose && (
+          <button onClick={onClose} className="btn btn-ghost btn-sm">
+            Закрыть
+          </button>
+        )}
+      </div>
+
       {!chat ? (
         <div className="py-10 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
           Чат не найден
@@ -218,7 +226,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
                 {supportStatusNames[chat.status] || chat.status}
               </span>
               {chat.assignedStaffName && (
-                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>· Оператор: {chat.assignedStaffName}</span>
+                <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Оператор: {chat.assignedStaffName}</span>
               )}
             </div>
           )}
@@ -229,7 +237,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
             </p>
           )}
 
-          <div className="h-64 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+          <div className="h-96 overflow-y-auto space-y-2.5 p-3 rounded-xl" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             {messages.length === 0 ? (
               <p className="text-center text-sm py-6" style={{ color: 'var(--color-text-tertiary)' }}>
                 {mode === 'user'
@@ -279,7 +287,7 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
                 aria-label="Сообщение"
               />
               <button type="submit" disabled={sending || !text.trim()} className="btn btn-primary btn-sm shrink-0">
-                {sending ? '...' : '➤'}
+                {sending ? '...' : 'Отправить'}
               </button>
             </form>
           )}
@@ -311,6 +319,6 @@ export function SupportChatPanel({ mode, chatId, onClose }: SupportChatPanelProp
           )}
         </div>
       )}
-    </Modal>
+    </div>
   );
 }

@@ -8,12 +8,12 @@ export const sportColors: Record<string, string> = {
 };
 
 export const sportIcons: Record<string, string> = {
-  padel: '🎾',
-  tennis: '🎾',
-  badminton: '🏸',
-  squash: '🏓',
-  football: '⚽',
-  running: '🏃',
+  padel: 'P',
+  tennis: 'T',
+  badminton: 'B',
+  squash: 'S',
+  football: 'F',
+  running: 'R',
 };
 
 export const sportNames: Record<string, string> = {

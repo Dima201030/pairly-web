@@ -1,12 +1,12 @@
 'use client';
 
 import { MainLayout } from '@/components/layout/MainLayout';
-import { MatchesTab } from '@/components/tabs/MatchesTab';
+import { ProfileTab } from '@/components/tabs/ProfileTab';
 
-export default function MatchesPage() {
+export default function ProfilePage() {
   return (
     <MainLayout>
-      <MatchesTab />
+      <ProfileTab />
     </MainLayout>
   );
 }

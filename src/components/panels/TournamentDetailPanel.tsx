@@ -97,9 +97,9 @@ export function TournamentDetailPanel({ tournamentId, initial, onClose }: Tourna
           </div>
           <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Дата начала</p>
-            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>📅 {formatDate(tournament.startDate)}</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{formatDate(tournament.startDate)}</p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-tertiary)' }}>
-              ⏰ Рег. до {formatDate(tournament.registrationDeadline || tournament.startDate)}
+              Рег. до {formatDate(tournament.registrationDeadline || tournament.startDate)}
             </p>
           </div>
         </div>

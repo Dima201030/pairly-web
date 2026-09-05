@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/ui/Toast';
-import { sportNames, levelNames, sportIcons } from '@/lib/theme';
+import { sportNames, levelNames } from '@/lib/theme';
 import { Sport, SkillLevel, SavedVenue } from '@/lib/types';
 import { collection, doc, setDoc, Timestamp, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -91,7 +91,6 @@ export function CreateMatchTab() {
     return (
       <div className="flex-1 flex items-center justify-center pb-24 md:pb-6">
         <div className="text-center px-4 animate-in">
-          <div className="text-4xl mb-3">🔐</div>
           <p className="text-base font-medium" style={{ color: 'var(--color-text-secondary)' }}>Войдите, чтобы создать заявку</p>
         </div>
       </div>
@@ -105,7 +104,7 @@ export function CreateMatchTab() {
         <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Опишите игру — и игроки смогут записаться</p>
       </div>
 
-      <Section step="1" title="Спорт">
+      <Section title="Спорт">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="radiogroup">
           {(['padel', 'tennis', 'badminton', 'squash', 'football', 'running'] as Sport[]).map(sport => (
             <label
@@ -124,19 +123,18 @@ export function CreateMatchTab() {
                 onChange={() => setForm(f => ({ ...f, sport, venueId: '' }))}
                 className="sr-only"
               />
-              <span className="text-lg">{sportIcons[sport]}</span>
               <span className="text-sm font-medium">{sportNames[sport]}</span>
             </label>
           ))}
         </div>
       </Section>
 
-      <Section step="2" title="Место">
+      <Section title="Место">
         {venuesLoading ? (
           <div className="text-center py-6 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Загрузка клубов...</div>
         ) : filteredVenues.length === 0 ? (
           <EmptyState
-            icon="🏟️"
+            icon=""
             title="Нет клубов для этого спорта"
             description="Клубы добавляются через «Модерация» → «Клубы»"
             variant="compact"
@@ -180,7 +178,7 @@ export function CreateMatchTab() {
         )}
       </Section>
 
-      <Section step="3" title="Уровень и места">
+      <Section title="Уровень и места">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label" htmlFor="level">Уровень</label>
@@ -225,7 +223,7 @@ export function CreateMatchTab() {
         )}
       </Section>
 
-      <Section step="4" title="Комментарий">
+      <Section title="Комментарий">
         <textarea
           value={form.note}
           onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
@@ -247,21 +245,14 @@ export function CreateMatchTab() {
 }
 
 interface SectionProps {
-  step: string;
   title: string;
   children: React.ReactNode;
 }
 
-function Section({ step, title, children }: SectionProps) {
+function Section({ title, children }: SectionProps) {
   return (
     <div className="card p-4 space-y-3">
-      <h3 className="font-semibold text-sm flex items-center gap-2.5" style={{ color: 'var(--color-text-primary)' }}>
-        <span
-          className="flex-shrink-0 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center"
-          style={{ background: 'var(--color-accent)', color: 'var(--color-accent-on)' }}
-        >
-          {step}
-        </span>
+      <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
         {title}
       </h3>
       {children}

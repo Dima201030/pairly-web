@@ -7,7 +7,7 @@ import { collection, query, where, orderBy, onSnapshot, limit } from 'firebase/f
 import { Match, Tournament, Sport, SkillLevel } from '@/lib/types';
 import { formatDate } from '@/lib/format';
 import { useEffect, useState } from 'react';
-import { sportNames, levelNames, roleNames, sportIcons, sportColors } from '@/lib/theme';
+import { sportNames, levelNames, roleNames, sportColors } from '@/lib/theme';
 import { SupportChatPanel } from '@/components/panels/SupportChatPanel';
 
 export function ProfileTab() {
@@ -101,7 +101,6 @@ export function ProfileTab() {
     return (
       <div className="flex-1 flex flex-col items-center justify-center pb-24 md:pb-10 px-4">
         <div className="text-center animate-in">
-          <div className="text-5xl mb-3">👤</div>
           <p className="text-lg font-medium text-[var(--color-text-secondary)]">Профиль не найден</p>
           <p className="text-sm text-[var(--color-text-tertiary)] mt-1 max-w-xs">
             Аккаунт создан, но документ профиля в базе ещё не появился. Нажмите кнопку ниже,
@@ -148,7 +147,7 @@ export function ProfileTab() {
               </span>
               {profile.rating > 0 && (
                 <span className="flex items-center gap-1 font-semibold" style={{ color: 'var(--color-highlight)' }}>
-                  ⭐ {profile.rating.toFixed(1)}
+                  {profile.rating.toFixed(1)}
                 </span>
               )}
             </div>
@@ -156,8 +155,8 @@ export function ProfileTab() {
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
-          <StatCard value={myMatches.length} label="Матчей" icon="🏟️" />
-          <StatCard value={myTournaments.length} label="Турниров" icon="🏆" />
+          <StatCard value={myMatches.length} label="Матчей" />
+          <StatCard value={myTournaments.length} label="Турниров" />
         </div>
 
         <div className="mt-4 flex gap-2">
@@ -243,7 +242,6 @@ export function ProfileTab() {
         items={myMatches.slice(0, 5)}
         renderItem={m => (
           <ActivityItem
-            icon={sportIcons[m.sport]}
             title={m.venue}
             subtitle={formatDate(m.startDate)}
             badge={
@@ -262,7 +260,6 @@ export function ProfileTab() {
         items={myTournaments.slice(0, 5)}
         renderItem={t => (
           <ActivityItem
-            icon={sportIcons[t.sport]}
             title={t.title}
             subtitle={formatDate(t.startDate)}
             badge={<span className="badge badge-gray">{t.participants.length}/{t.maxParticipants}</span>}
@@ -276,7 +273,7 @@ export function ProfileTab() {
           onClick={() => setShowSupport(true)}
           className="btn btn-outline btn-full"
         >
-          🎧 Связаться с поддержкой
+          Связаться с поддержкой
         </button>
         <button
           onClick={() => logout()}
@@ -296,13 +293,11 @@ export function ProfileTab() {
 interface StatCardProps {
   value: number;
   label: string;
-  icon: string;
 }
 
-function StatCard({ value, label, icon }: StatCardProps) {
+function StatCard({ value, label }: StatCardProps) {
   return (
     <div className="card p-4 text-center">
-      <div className="text-xl" aria-hidden="true">{icon}</div>
       <div className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</div>
       <div className="text-xs text-[var(--color-text-tertiary)]">{label}</div>
     </div>
@@ -343,16 +338,14 @@ function ActivitySection<T>({ title, count, items, renderItem, emptyMessage }: A
 }
 
 interface ActivityItemProps {
-  icon: string;
   title: string;
   subtitle: string;
   badge: React.ReactNode;
 }
 
-function ActivityItem({ icon, title, subtitle, badge }: ActivityItemProps) {
+function ActivityItem({ title, subtitle, badge }: ActivityItemProps) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xl">{icon}</span>
+    <div className="flex items-center justify-between">
       <div className="min-w-0">
         <p className="font-medium truncate">{title}</p>
         <p className="text-sm text-[var(--color-text-tertiary)]">{subtitle}</p>

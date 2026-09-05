@@ -276,7 +276,7 @@ export function TournamentsTab() {
 
       {tournaments.length === 0 ? (
         <EmptyState
-          icon="🏆"
+          icon=""
           title="Турниров пока нет"
           description={isStaff ? 'Создайте первый турнир!' : 'Организаторы скоро добавят соревнования'}
         />
@@ -292,13 +292,14 @@ export function TournamentsTab() {
             <article key={t.id} className={`card-interactive p-4 animate-in ${isJoined ? 'border-[var(--color-accent)]/30' : ''}`} style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }} role="listitem" onClick={() => setSelectedTournament(t)}>
               <div className="flex gap-3">
                 <div
-                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                  className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold"
                   style={{
                     backgroundColor: `${sportColor}1F`,
                     border: `1px solid ${sportColor}33`,
+                    color: sportColor,
                   }}
                 >
-                  <span aria-hidden="true">{sportIcons[t.sport]}</span>
+                  {sportIcons[t.sport]}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -314,12 +315,10 @@ export function TournamentsTab() {
 
               <div className="flex flex-wrap items-center gap-2 text-xs mt-2">
                 <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-                  <span aria-hidden="true">{sportIcons[t.sport]}</span>
                   {sportNames[t.sport]}
                 </span>
                 <span className="badge badge-gray">{levelNames[t.level]}</span>
                 <span className="flex items-center gap-1" style={{ color: 'var(--color-text-secondary)' }}>
-                  <span aria-hidden="true">👥</span>
                   {t.participants.length}/{t.maxParticipants}
                 </span>
               </div>
@@ -331,7 +330,7 @@ export function TournamentsTab() {
               )}
 
               <div className="flex items-center gap-2 text-xs mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-                <span>📅 {formatDate(t.startDate)}</span>
+                <span>{formatDate(t.startDate)}</span>
               </div>
 
               {t.note && <p className="mt-2 text-xs line-clamp-2" style={{ color: 'var(--color-text-secondary)' }}>{t.note}</p>}

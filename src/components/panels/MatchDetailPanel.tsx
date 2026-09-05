@@ -160,8 +160,8 @@ export function MatchDetailPanel({ matchId, initial, onClose }: MatchDetailPanel
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Когда</p>
-            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>📅 {formatDate(match.startDate)}</p>
-            <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>⏱️ {timeUntil(match.startDate)}</p>
+            <p className="font-semibold text-sm mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{formatDate(match.startDate)}</p>
+            <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{timeUntil(match.startDate)}</p>
           </div>
           <div className="p-3 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
             <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>Места</p>
