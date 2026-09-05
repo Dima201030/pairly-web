@@ -1,30 +1,19 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/lib/AuthContext';
+
+type Page = 'matches' | 'create' | 'tournaments' | 'moderation' | 'profile' | 'support';
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  activePage: Page;
+  onNavigate: (page: Page) => void;
 }
 
-const NAV_ITEMS = [
-  { href: '/', label: 'Матчи' },
-  { href: '/create', label: 'Новая заявка' },
-  { href: '/tournaments', label: 'Турниры' },
-  { href: '/support', label: 'Поддержка' },
-  { href: '/profile', label: 'Профиль' },
-];
-
-const STAFF_ITEMS = [
-  { href: '/moderation', label: 'Модерация' },
-];
-
-export function Sidebar({ open, onClose }: SidebarProps) {
-  const pathname = usePathname();
+export function Sidebar({ open, onClose, activePage, onNavigate }: SidebarProps) {
   const { profile, isStaff, logout } = useAuth();
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -42,7 +31,17 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     };
   }, [open, handleKeyDown]);
 
-  const items = isStaff ? [...NAV_ITEMS, ...STAFF_ITEMS] : NAV_ITEMS;
+  const NAV_ITEMS: { id: Page; label: string }[] = [
+    { id: 'matches', label: 'Матчи' },
+    { id: 'create', label: 'Новая заявка' },
+    { id: 'tournaments', label: 'Турниры' },
+    { id: 'support', label: 'Поддержка' },
+    { id: 'profile', label: 'Профиль' },
+  ];
+
+  if (isStaff) {
+    NAV_ITEMS.splice(3, 0, { id: 'moderation', label: 'Модерация' });
+  }
 
   return (
     <>
@@ -79,26 +78,19 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </div>
 
           <nav className="flex-1 py-3 px-3 space-y-0.5">
-            {items.map(item => {
-              const isActive = item.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(item.href);
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={`block px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
-                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            {NAV_ITEMS.map(item => (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  activePage === item.id
+                    ? 'bg-[var(--color-accent)] text-[var(--color-accent-on)]'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)]'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </nav>
 
           <div className="p-3 border-t border-[var(--color-border)]">

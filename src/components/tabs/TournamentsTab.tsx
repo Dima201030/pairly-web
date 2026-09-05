@@ -8,6 +8,7 @@ import { collection, query, orderBy, onSnapshot, Timestamp, doc, setDoc, limit, 
 import { db } from '@/lib/firebase';
 import { useEffect, useState, useRef } from 'react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { TournamentsSkeleton } from '@/components/ui/Skeleton';
 import { TournamentDetailPanel } from '@/components/panels/TournamentDetailPanel';
 
 const DEFAULT_START = Date.now() + 7 * 24 * 60 * 60 * 1000;
@@ -182,14 +183,20 @@ export function TournamentsTab() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>Загрузка турниров...</div>
+      <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="h-7 w-32 rounded-lg animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
+            <div className="h-4 w-56 rounded-lg mt-1 animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
+          </div>
+        </div>
+        <TournamentsSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4 animate-in">
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Турниры</h1>

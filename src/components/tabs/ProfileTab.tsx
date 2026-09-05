@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/format';
 import { useEffect, useState } from 'react';
 import { sportNames, levelNames, roleNames, sportColors } from '@/lib/theme';
 import { SupportChatPanel } from '@/components/panels/SupportChatPanel';
+import { ProfileSkeleton } from '@/components/ui/Skeleton';
 
 export function ProfileTab() {
   const { profile, user, logout, updateProfile, restoreProfile } = useAuth();
@@ -91,8 +92,8 @@ export function ProfileTab() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center pb-24 md:pb-10">
-        <div className="animate-pulse-slow text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Загрузка...</div>
+      <div className="flex-1 overflow-y-auto pb-24 md:pb-10 px-4 pt-4 max-w-3xl mx-auto">
+        <ProfileSkeleton />
       </div>
     );
   }

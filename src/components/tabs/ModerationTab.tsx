@@ -229,7 +229,7 @@ export function ModerationTab() {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 max-w-5xl mx-auto">
+    <div className="flex-1 overflow-y-auto pb-24 md:pb-10 pt-4 px-4 space-y-4 max-w-5xl mx-auto animate-in">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Модерация</h1>
@@ -323,7 +323,19 @@ export function ModerationTab() {
       {activeSection === 'tournaments' && (
         <div className="space-y-3">
           {tournamentsLoading ? (
-            <div className="flex items-center justify-center py-8">Загрузка...</div>
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card p-4 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div className="h-4 w-40 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                      <div className="h-3 w-32 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                    </div>
+                    <div className="h-5 w-20 rounded-full" style={{ background: 'var(--color-surface-hover)' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : tournaments.map(t => (
             <div key={t.id} className="card p-4">
               <div className="flex items-center justify-between">
@@ -343,7 +355,19 @@ export function ModerationTab() {
       {activeSection === 'matches' && (
         <div className="space-y-3">
           {matchesLoading ? (
-            <div className="flex items-center justify-center py-8">Загрузка...</div>
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card p-4 animate-pulse">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-40 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                      <div className="h-3 w-32 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                    </div>
+                    <div className="h-5 w-16 rounded-full" style={{ background: 'var(--color-surface-hover)' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : matches.length === 0 ? (
             <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
               <p className="font-medium">Матчей пока нет</p>
@@ -490,7 +514,19 @@ export function ModerationTab() {
           )}
 
           {venuesLoading ? (
-            <div className="flex items-center justify-center py-8">Загрузка...</div>
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="card p-4 animate-pulse">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="space-y-2">
+                      <div className="h-4 w-40 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                      <div className="h-3 w-32 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                    </div>
+                    <div className="h-8 w-20 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : venues.length === 0 ? (
             <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
               <p className="font-medium">Мест пока нет</p>
@@ -528,7 +564,17 @@ export function ModerationTab() {
               Обращения
             </h3>
             {supportChatsLoading ? (
-              <div className="flex items-center justify-center py-8">Загрузка...</div>
+              <div className="space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="card p-4 animate-pulse">
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                      <div className="h-3 w-48 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                      <div className="h-3 w-40 rounded-lg" style={{ background: 'var(--color-surface-hover)' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : supportChats.length === 0 ? (
               <div className="card p-6 text-center" style={{ color: 'var(--color-text-tertiary)' }}>
                 <p className="font-medium">Обращений пока нет</p>

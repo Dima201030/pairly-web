@@ -10,8 +10,8 @@ import { db } from '@/lib/firebase';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { YandexMap } from '@/components/ui/YandexMap';
 import { MatchDetailPanel } from '@/components/panels/MatchDetailPanel';
+import { MatchListSkeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 
 const NTRP_LEVELS: NTRPLevel[] = ['2.0', '2.5', '3.0', '3.5', '4.0', '4.5', '5.0'];
 
@@ -22,10 +22,9 @@ function getLevelOptions(sport: Sport | null): (SkillLevel | NTRPLevel)[] {
   return ['any', 'beginner', 'middle', 'advanced'] as SkillLevel[];
 }
 
-export function MatchesTab() {
+export function MatchesTab({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const { profile, isStaff } = useAuth();
   const { showToast } = useToast();
-  const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
@@ -188,10 +187,15 @@ export function MatchesTab() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-pulse-slow text-lg font-semibold" style={{ color: 'var(--color-text-tertiary)' }}>
-          Загрузка матчей...
+      <div className="flex-1 overflow-y-auto pb-24 md:pb-6 pt-5 px-4 space-y-4">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="h-7 w-24 rounded-lg animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
+            <div className="h-4 w-40 rounded-lg mt-1 animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
+          </div>
         </div>
+        <div className="h-10 w-48 rounded-xl animate-pulse" style={{ background: 'var(--color-surface-hover)' }} />
+        <MatchListSkeleton />
       </div>
     );
   }
@@ -431,7 +435,7 @@ export function MatchesTab() {
           title="Матчей пока нет"
           description="Создай первую заявку или подожди других игроков"
           actionLabel="Создать заявку"
-          onAction={() => router.push('/create')}
+          onAction={() => onNavigate?.('create')}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="list" aria-label="Список матчей">
