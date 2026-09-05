@@ -98,7 +98,7 @@ export function CreateMatchTab() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pb-24 md:pb-6 px-3 sm:px-4 pt-5 space-y-4 animate-in max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto overflow-x-hidden pb-24 md:pb-6 px-3 sm:px-4 pt-5 space-y-4 animate-in max-w-2xl mx-auto w-full min-w-0">
       <div className="mb-2">
         <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Новая заявка</h1>
         <p className="mt-0.5 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>Опишите игру — и игроки смогут записаться</p>
@@ -141,21 +141,21 @@ export function CreateMatchTab() {
           />
         ) : (
           <div className="space-y-3">
-            <div>
-              <label className="label" htmlFor="venue">Клуб</label>
-              <select
-                id="venue"
-                value={form.venueId}
-                onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
-                className="input-field"
-                required
-              >
-                <option value="">Выберите клуб</option>
-                {filteredVenues.map(v => (
-                  <option key={v.id} value={v.id}>{v.name} — {v.city}{v.district ? `, ${v.district}` : ''}</option>
-                ))}
-              </select>
-            </div>
+          <div className="min-w-0">
+            <label className="label" htmlFor="venue">Клуб</label>
+            <select
+              id="venue"
+              value={form.venueId}
+              onChange={e => setForm(f => ({ ...f, venueId: e.target.value }))}
+              className="input-field w-full"
+              required
+            >
+              <option value="">Выберите клуб</option>
+              {filteredVenues.map(v => (
+                <option key={v.id} value={v.id}>{v.name} — {v.city}{v.district ? `, ${v.district}` : ''}</option>
+              ))}
+            </select>
+          </div>
 
             {selectedVenue && (selectedVenue.latitude !== 0 || selectedVenue.longitude !== 0) && (
               <div className="rounded-xl overflow-hidden">
@@ -163,14 +163,15 @@ export function CreateMatchTab() {
               </div>
             )}
 
-            <div>
+            <div className="min-w-0">
               <label className="label" htmlFor="startDate">Дата и время</label>
               <input
                 id="startDate"
                 type="datetime-local"
                 value={form.startDate.toISOString().slice(0, 16)}
                 onChange={e => setForm(f => ({ ...f, startDate: new Date(e.target.value) }))}
-                className="input-field"
+                className="input-field w-full"
+                style={{ maxWidth: '100%' }}
                 required
               />
             </div>
@@ -180,20 +181,20 @@ export function CreateMatchTab() {
 
       <Section title="Уровень и места">
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-          <div>
+          <div className="min-w-0">
             <label className="label" htmlFor="level">Уровень</label>
             <select
               id="level"
               value={form.level}
               onChange={e => setForm(f => ({ ...f, level: e.target.value as SkillLevel }))}
-              className="input-field"
+              className="input-field w-full"
             >
               {(['any', 'beginner', 'middle', 'advanced'] as SkillLevel[]).map(l => (
                 <option key={l} value={l}>{levelNames[l]}</option>
               ))}
             </select>
           </div>
-          <div>
+          <div className="min-w-0">
             <label className="label" htmlFor="openSpots">Свободных мест</label>
             <input
               id="openSpots"
@@ -202,19 +203,19 @@ export function CreateMatchTab() {
               max="20"
               value={form.openSpots}
               onChange={e => setForm(f => ({ ...f, openSpots: parseInt(e.target.value) || 1 }))}
-              className="input-field"
+              className="input-field w-full"
             />
           </div>
         </div>
 
         {form.sport === 'tennis' && (
-          <div>
+          <div className="min-w-0">
             <label className="label" htmlFor="tennisType">Формат</label>
             <select
               id="tennisType"
               value={form.tennisType}
               onChange={e => setForm(f => ({ ...f, tennisType: e.target.value as 'singles' | 'doubles' }))}
-              className="input-field"
+              className="input-field w-full"
             >
               <option value="singles">Одиночный</option>
               <option value="doubles">Парный</option>
@@ -229,7 +230,7 @@ export function CreateMatchTab() {
           onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
           rows={3}
           placeholder="Дополнительная информация (необязательно)"
-          className="input-field resize-none"
+          className="input-field resize-none w-full min-w-0"
         />
       </Section>
 
