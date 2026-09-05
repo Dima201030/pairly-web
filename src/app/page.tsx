@@ -106,7 +106,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pairly-bg">
-      <div className="relative min-h-screen flex flex-col">
+      <div className="relative h-screen flex flex-col">
         <ToastProvider>
           <CookieConsent />
           <header
@@ -138,10 +138,10 @@ export default function HomePage() {
 
           <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} activePage={activePage} onNavigate={navigate} />
 
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 h-full">
             <DesktopSidebar activePage={activePage} onNavigate={navigate} />
-            <main className="flex-1 overflow-hidden">
-              <div key={pageKey} className="h-full animate-in">
+            <main className="flex-1 overflow-hidden flex flex-col">
+              <div key={pageKey} className="flex-1 flex flex-col animate-in overflow-hidden">
                 {renderPage()}
               </div>
             </main>
