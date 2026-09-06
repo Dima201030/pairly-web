@@ -36,7 +36,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // (до исправления register отправлял role, и правила отклоняли create).
   // Создаём минимальный док БЕЗ role/blocked — правила это разрешают.
   const createMissingProfile = useCallback(async (fuser: FirebaseUser) => {
-    const { Timestamp } = await import('firebase/firestore');
+    const { Timestamp, getDoc } = await import('firebase/firestore');
+    const deletedRef = doc(db, 'deleted_users', fuser.uid);
+    const deletedSnap = await getDoc(deletedRef);
+    if (deletedSnap.exists()) {
+      console.warn('[AuthContext] user', fuser.uid, 'is deleted — skipping profile creation');
+      return;
+    }
     const name = fuser.displayName || (fuser.email ? fuser.email.split('@')[0] : 'Пользователь');
     try {
       setProfile({
@@ -172,6 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profileData = Object.fromEntries(
       Object.entries(updated).filter(([key, val]) => !serverFields.has(key) && val !== undefined)
     );
+    console.log('[AuthContext] updateProfile keys:', Object.keys(profileData), 'ntrp:', profileData.ntrp, 'ntrp type:', typeof profileData.ntrp);
     const createdAt = updated.createdAt instanceof Date
       ? Timestamp.fromDate(updated.createdAt)
       : updated.createdAt;
